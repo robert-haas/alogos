@@ -1,0 +1,90 @@
+from . import default_parameters as _default_parameters
+from . import representation as _representation
+from .. import _shared
+from ... import _grammar
+from ..._utilities.parametrization import get_given_or_default as _get_given_or_default
+
+
+_NT = _grammar.data_structures.NonterminalSymbol
+_T = _grammar.data_structures.TerminalSymbol
+
+
+def int_replacement(grammar, genotype, parameters=None):
+    # Parameter extraction
+    distance = _get_given_or_default('neighborhood_distance', parameters, _default_parameters)
+    max_size = _get_given_or_default('neighborhood_max_size', parameters, _default_parameters)
+    only_t = _get_given_or_default('neighborhood_only_terminals', parameters, _default_parameters)
+    max_expansions = _get_given_or_default('max_expansions', parameters, _default_parameters)
+    max_wraps = _get_given_or_default('max_wraps', parameters, _default_parameters)
+
+    # Argument processing
+    if not isinstance(genotype, _representation.Genotype):
+        genotype = _representation.Genotype(genotype)
+
+    # Get alternative choices per position by going through a forward mapping
+    choices = _get_choices_per_position(grammar, genotype.data, max_expansions, max_wraps, only_t)
+    num_choices_per_pos = [len(x) for x in choices]
+
+    # Generate combinations of choices
+    combinations = _shared.neighborhood.generate_combinations(
+        num_choices_per_pos, distance, max_size)
+
+    # Construct neighborhood genotypes from combinations
+    nbrs = []
+    n = len(genotype)
+    gt_unrolled = [genotype.data[i % n] for i in range(len(choices))]
+    for comb in combinations:
+        # Semantics of comb: 0 means no change, >0 points to a certain alternative choice
+        data = [choices[i][val-1] if val > 0 else gt_unrolled[i] for i, val in enumerate(comb)]
+        nbrs.append(_representation.Genotype(data))
+    return nbrs
+
+
+def _get_choices_per_position(grammar, codons, max_expansions, max_wraps, only_terminals):
+    """Determine alternative choices for each position in the genotype."""
+    dt = _grammar.data_structures.DerivationTree(grammar)
+    stack = [dt.root_node]
+    num_codons = len(codons)
+    codon_counter = 0
+    expansion_counter = 0
+    choices = []
+    while stack:
+        # Check stop conditions
+        if max_wraps is not None and codon_counter // num_codons > max_wraps:
+            break
+        if max_expansions is not None and expansion_counter >= max_expansions:
+            break
+
+        # 1) Choose nonterminal: GE uses the leftmost, unexpanded nonterminal
+        chosen_nt_idx = 0
+        chosen_nt_node = stack.pop(chosen_nt_idx)
+
+        # 2) Choose rule: GE decides by the next "codon" in the genotype
+        rules = grammar.production_rules[chosen_nt_node.symbol]
+        num_rules = len(rules)
+        if num_rules == 1:
+            chosen_rule_idx = 0
+        else:
+            content_codon = codons[codon_counter % num_codons]
+            codon_counter += 1
+            chosen_rule_idx = content_codon % num_rules
+        chosen_rule = rules[chosen_rule_idx]
+
+        # 3) Expand the chosen nonterminal (1) with the rhs of the chosen rule (2)
+        new_nodes = dt._expand(chosen_nt_node, chosen_rule)
+        expansion_counter += 1
+
+        # 4) Add new nodes that contain a nonterminal to the stack
+        new_nt_nodes = [node for node in new_nodes if isinstance(node.symbol, _NT)]
+        stack = new_nt_nodes + stack
+
+        # Remember alternative choices for the current production rule
+        if num_rules > 1:
+            if only_terminals:
+                other_rule_indices = [idx for idx, rule in enumerate(rules)
+                                      if idx != chosen_rule_idx
+                                      and any(isinstance(sym, _T) for sym in rule)]
+            else:
+                other_rule_indices = [idx for idx in range(num_rules) if idx != chosen_rule_idx]
+            choices.append(other_rule_indices)
+    return choices

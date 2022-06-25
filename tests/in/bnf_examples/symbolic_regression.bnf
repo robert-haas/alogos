@@ -1,0 +1,3 @@
+<expr> ::= <expr> <op> <expr> | <var>
+<op> ::= + | - | * | /
+<var> ::= x | y
