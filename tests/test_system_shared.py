@@ -1,9 +1,32 @@
-import pytest
+import shared
 
 import alogos as al
 
 
+# Initialization
+
+
+def test_init_tree():
+    # These functions are also tested in more detail in the context
+    # of the Grammar method: generate_derivation_tree
+    func_names = [
+        "uniform",
+        "weighted",
+        "ptc2",
+        "grow_one_branch_to_max_depth",
+        "grow_all_branches_within_max_depth",
+        "grow_all_branches_to_max_depth",
+    ]
+    for name in func_names:
+        func = getattr(al.systems._shared.init_tree, name)
+        dt = func(shared.GRAMMAR_FLOAT)
+        assert isinstance(dt, al._grammar.data_structures.DerivationTree)
+        assert isinstance(dt.string(), str)
+        assert isinstance(float(dt.string()), float)
+
+
 # Crossover
+
 
 def test_crossover_two_points():
     for length, expected_num_variants in [(2, 2), (3, 5), (4, 9)]:
@@ -16,6 +39,7 @@ def test_crossover_two_points():
 
 # Neighborhood
 
+
 def test_generate_combinations_1():
     no_choices = [
         [],
@@ -26,12 +50,14 @@ def test_generate_combinations_1():
         for distance in (1, 2, 3, 4):
             # Full
             comb = al.systems._shared.neighborhood.generate_combinations(
-                choices_per_position, distance)
+                choices_per_position, distance
+            )
             assert comb == []
             # Subset
             for max_size in (1, 2, 3, 4):
                 comb = al.systems._shared.neighborhood.generate_combinations(
-                    choices_per_position, distance, max_size=2)
+                    choices_per_position, distance, max_size=max_size
+                )
                 assert comb == []
 
 
@@ -43,15 +69,21 @@ def test_generate_combinations_2():
 
     # Full
     distance = 1
-    comb = al.systems._shared.neighborhood.generate_combinations(choices_per_position, distance)
+    comb = al.systems._shared.neighborhood.generate_combinations(
+        choices_per_position, distance
+    )
     assert sorted(comb) == d1_comb
 
     distance = 2
-    comb = al.systems._shared.neighborhood.generate_combinations(choices_per_position, distance)
+    comb = al.systems._shared.neighborhood.generate_combinations(
+        choices_per_position, distance
+    )
     assert sorted(comb) == d2_comb
 
     distance = 3
-    comb = al.systems._shared.neighborhood.generate_combinations(choices_per_position, distance)
+    comb = al.systems._shared.neighborhood.generate_combinations(
+        choices_per_position, distance
+    )
     assert sorted(comb) == d3_comb
 
     # Subset
@@ -61,7 +93,8 @@ def test_generate_combinations_2():
         full = set()
         for _ in range(n):
             new = al.systems._shared.neighborhood.generate_combinations(
-                choices_per_position, distance, max_size=max_size)
+                choices_per_position, distance, max_size=max_size
+            )
             assert len(new) == max_size
             full = full.union(new)
         assert sorted(full) == d1_comb
@@ -70,7 +103,8 @@ def test_generate_combinations_2():
         full = set()
         for _ in range(n):
             new = al.systems._shared.neighborhood.generate_combinations(
-                choices_per_position, distance, max_size=max_size)
+                choices_per_position, distance, max_size=max_size
+            )
             assert len(new) == max_size
             full = full.union(new)
         assert sorted(full) == d2_comb
@@ -79,7 +113,8 @@ def test_generate_combinations_2():
         full = set()
         for _ in range(n):
             new = al.systems._shared.neighborhood.generate_combinations(
-                choices_per_position, distance, max_size=max_size)
+                choices_per_position, distance, max_size=max_size
+            )
             assert len(new) == 0
             full = full.union(new)
         assert sorted(full) == d3_comb
@@ -87,44 +122,59 @@ def test_generate_combinations_2():
 
 def test_generate_combinations_3():
     choices_per_position = [0, 3, 1, 0, 2]
-    d1_comb = set([
-        (0, 1, 0, 0, 0),
-        (0, 2, 0, 0, 0),
-        (0, 3, 0, 0, 0),
-        (0, 0, 1, 0, 0),
-        (0, 0, 0, 0, 1),
-        (0, 0, 0, 0, 2)])
-    d2_comb = set([
-        (0, 1, 1, 0, 0),
-        (0, 2, 1, 0, 0),
-        (0, 3, 1, 0, 0),
-        (0, 1, 0, 0, 1),
-        (0, 1, 0, 0, 2),
-        (0, 2, 0, 0, 1),
-        (0, 2, 0, 0, 2),
-        (0, 3, 0, 0, 1),
-        (0, 3, 0, 0, 2),
-        (0, 0, 1, 0, 1),
-        (0, 0, 1, 0, 2)])
-    d3_comb = set([
-        (0, 1, 1, 0, 1),
-        (0, 1, 1, 0, 2),
-        (0, 2, 1, 0, 1),
-        (0, 2, 1, 0, 2),
-        (0, 3, 1, 0, 1),
-        (0, 3, 1, 0, 2)])
+    d1_comb = set(
+        [
+            (0, 1, 0, 0, 0),
+            (0, 2, 0, 0, 0),
+            (0, 3, 0, 0, 0),
+            (0, 0, 1, 0, 0),
+            (0, 0, 0, 0, 1),
+            (0, 0, 0, 0, 2),
+        ]
+    )
+    d2_comb = set(
+        [
+            (0, 1, 1, 0, 0),
+            (0, 2, 1, 0, 0),
+            (0, 3, 1, 0, 0),
+            (0, 1, 0, 0, 1),
+            (0, 1, 0, 0, 2),
+            (0, 2, 0, 0, 1),
+            (0, 2, 0, 0, 2),
+            (0, 3, 0, 0, 1),
+            (0, 3, 0, 0, 2),
+            (0, 0, 1, 0, 1),
+            (0, 0, 1, 0, 2),
+        ]
+    )
+    d3_comb = set(
+        [
+            (0, 1, 1, 0, 1),
+            (0, 1, 1, 0, 2),
+            (0, 2, 1, 0, 1),
+            (0, 2, 1, 0, 2),
+            (0, 3, 1, 0, 1),
+            (0, 3, 1, 0, 2),
+        ]
+    )
 
     # Full
     distance = 1
-    comb = al.systems._shared.neighborhood.generate_combinations(choices_per_position, distance)
+    comb = al.systems._shared.neighborhood.generate_combinations(
+        choices_per_position, distance
+    )
     assert set(comb) == d1_comb
 
     distance = 2
-    comb = al.systems._shared.neighborhood.generate_combinations(choices_per_position, distance)
+    comb = al.systems._shared.neighborhood.generate_combinations(
+        choices_per_position, distance
+    )
     assert set(comb) == d2_comb
 
     distance = 3
-    comb = al.systems._shared.neighborhood.generate_combinations(choices_per_position, distance)
+    comb = al.systems._shared.neighborhood.generate_combinations(
+        choices_per_position, distance
+    )
     assert set(comb) == d3_comb
 
     # Subset
@@ -134,7 +184,8 @@ def test_generate_combinations_3():
         full = set()
         for _ in range(n):
             new = al.systems._shared.neighborhood.generate_combinations(
-                choices_per_position, distance, max_size=max_size)
+                choices_per_position, distance, max_size=max_size
+            )
             assert len(new) == max_size
             full = full.union(new)
         assert full == d1_comb
@@ -143,7 +194,8 @@ def test_generate_combinations_3():
         full = set()
         for _ in range(n):
             new = al.systems._shared.neighborhood.generate_combinations(
-                choices_per_position, distance, max_size=max_size)
+                choices_per_position, distance, max_size=max_size
+            )
             assert len(new) == max_size
             full = full.union(new)
         assert full == d2_comb
@@ -152,7 +204,8 @@ def test_generate_combinations_3():
         full = set()
         for _ in range(n):
             new = al.systems._shared.neighborhood.generate_combinations(
-                choices_per_position, distance, max_size=max_size)
+                choices_per_position, distance, max_size=max_size
+            )
             assert len(new) == max_size
             full = full.union(new)
         assert full == d3_comb

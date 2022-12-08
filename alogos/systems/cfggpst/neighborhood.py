@@ -1,37 +1,52 @@
-import random as _random
+"""Neighborhood functions to generate nearby genotypes for CFG-GP-ST."""
 
-from . import default_parameters as _default_parameters
-from . import mapping as _mapping
-from . import representation as _representation
-from .. import _shared
 from ... import _grammar
 from ... import exceptions as _exceptions
 from ..._utilities.parametrization import get_given_or_default as _get_given_or_default
+from .. import _shared
+from . import default_parameters as _default_parameters
+from . import representation as _representation
 
 
-# Shortcuts for brevity and minor speedup
+# Shortcuts for minor speedup
 _DT = _grammar.data_structures.DerivationTree
 _NT = _grammar.data_structures.NonterminalSymbol
 _T = _grammar.data_structures.TerminalSymbol
 
 
 def subtree_replacement(grammar, genotype, parameters=None):
-    """TODO
-    
-    In case of distance > 1, one modification can effectively be countered by a second
-    modification upstream of it. This can lead to neighbors, where different modifications
-    are applied, but the same result is achieved, which in turn would imply duplicates in
-    the neighborhood. In order to prevent this, a final step is applied to ensure that
-    the neighborhood is filled with unique neighbors. This means, that the max_size limit
-    may have acted on the neighborhood, but the deduplication step reduces the size of
-    the returned neighborhood.
+    """Systematically change a chosen number of nodes.
+
+    Parameters
+    ----------
+    grammar : `~alogos.Grammar`
+    genotype : `~.representation.Genotype`
+    parameters : `dict` or `~alogos._utilities.parametrization.ParameterCollection`, optional
+        Following keyword-value pairs are considered by this function:
+
+        - ``neighborhood_distance`` (`int`) : The distance from the
+          original genotype to a new genotype in terms of replaced
+          subtrees.
+        - ``neighborhood_max_size`` (`int`) : Maximum number of
+          neighbor genotypes to generate.
+        - ``neighborhood_only_terminals`` (`bool`) : If `True`, only
+          replace nodes with terminals in them.
+
+    Returns
+    -------
+    neighbors : `list` of `~.representation.Genotype` objects
 
     """
     # Parameter extraction
-    distance = _get_given_or_default('neighborhood_distance', parameters, _default_parameters)
-    max_size = _get_given_or_default('neighborhood_max_size', parameters, _default_parameters)
-    only_t = _get_given_or_default('neighborhood_only_terminals', parameters, _default_parameters)
-    max_nodes = _get_given_or_default('max_nodes', parameters, _default_parameters)
+    distance = _get_given_or_default(
+        "neighborhood_distance", parameters, _default_parameters
+    )
+    max_size = _get_given_or_default(
+        "neighborhood_max_size", parameters, _default_parameters
+    )
+    only_t = _get_given_or_default(
+        "neighborhood_only_terminals", parameters, _default_parameters
+    )
 
     # Argument processing
     if not isinstance(genotype, _representation.Genotype):
@@ -45,7 +60,8 @@ def subtree_replacement(grammar, genotype, parameters=None):
 
     # Generate combinations of choices
     combinations = _shared.neighborhood.generate_combinations(
-        num_choices_per_pos, distance, max_size)
+        num_choices_per_pos, distance, max_size
+    )
 
     # Neighborhood construction
     if distance == 1:
@@ -62,7 +78,7 @@ def _generate_nbrs_fast_for_d1(grammar, dt, nodes, choices, combinations):
         for idx, val in enumerate(comb):
             if val > 0:
                 node = nodes[idx]
-                rhs_idx = choices[idx][val-1]
+                rhs_idx = choices[idx][val - 1]
                 rhs = grammar.production_rules[node.symbol][rhs_idx]
                 # Create a new subtree
                 node_new = _grow_deterministic_subtree(grammar, node, rhs)
@@ -85,7 +101,7 @@ def _generate_nbrs_slow(grammar, dt, nodes, choices, combinations):
         for idx, val in enumerate(comb):
             if val > 0:
                 node = nodes[idx]
-                rhs_idx = choices[idx][val-1]
+                rhs_idx = choices[idx][val - 1]
                 rhs = grammar.production_rules[node.symbol][rhs_idx]
                 # Create a new subtree
                 node_new = _grow_deterministic_subtree(grammar, node, rhs)
@@ -111,7 +127,6 @@ def _get_choices_per_position(grammar, dt, only_terminals):
     while stack:
         # 1) Choose nonterminal -> Leftmost
         chosen_nt_node = stack.pop(0)
-        chosen_symbol = chosen_nt_node.symbol
 
         # 2) Choose rule -> Deduce it from tree
         try:
@@ -120,21 +135,26 @@ def _get_choices_per_position(grammar, dt, only_terminals):
         except Exception:
             _exceptions.raise_missing_nt_error(chosen_nt_node)
         try:
-            rhs = [node.symbol for node in chosen_nt_node.children]
             chosen_rule = [node.symbol for node in chosen_nt_node.children]
             chosen_rule_idx = rules.index(chosen_rule)
             if only_terminals:
-                other_rule_indices = [idx for idx, rule in enumerate(rules)
-                                      if idx != chosen_rule_idx
-                                      and any(isinstance(sym, _T) for sym in rule)]
+                other_rule_indices = [
+                    idx
+                    for idx, rule in enumerate(rules)
+                    if idx != chosen_rule_idx
+                    and any(isinstance(sym, _T) for sym in rule)
+                ]
             else:
-                other_rule_indices = [idx for idx in range(num_rules) if idx != chosen_rule_idx]
+                other_rule_indices = [
+                    idx for idx in range(num_rules) if idx != chosen_rule_idx
+                ]
         except ValueError:
             _exceptions.raise_missing_rhs_error(chosen_nt_node, chosen_rule)
 
         # 3) Expand the chosen nonterminal with rhs of the chosen rule -> Follow the expansion
-        new_nt_nodes = [node for node in chosen_nt_node.children
-                        if isinstance(node.symbol, _NT)]
+        new_nt_nodes = [
+            node for node in chosen_nt_node.children if isinstance(node.symbol, _NT)
+        ]
         stack = new_nt_nodes + stack
 
         # Store the observed decisions
@@ -146,7 +166,11 @@ def _get_choices_per_position(grammar, dt, only_terminals):
 def _grow_deterministic_subtree(grammar, node, rhs):
     # Cache lookup or one-time calculation
     min_depths = grammar._lookup_or_calc(
-        'shared', 'min_depths', _shared._cached_calculations.min_depths_to_terminals, grammar)
+        "shared",
+        "min_depths",
+        _shared._cached_calculations.min_depths_to_terminals,
+        grammar,
+    )
 
     # Create a new node to grow the subtree from
     node = node.copy()

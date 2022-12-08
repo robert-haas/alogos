@@ -8,7 +8,7 @@ from .. import data_structures as _data_structures
 
 
 def create_syntax_diagram(grammar):
-    """Create a figure of a syntax diagram (a.k.a. railroad diagram) that represents the grammar.
+    """Create a figure of a syntax diagram that represents the grammar.
 
     References
     ----------
@@ -16,9 +16,11 @@ def create_syntax_diagram(grammar):
 
     """
     # Railroad diagram styling options
-    _railroad.DIAGRAM_CLASS = 'rd'  # class set on the root <svg> element of each diagram
-    _railroad.VS = 14               # vertical separation between two items
-    _railroad.AR = 14               # radius of the arcs used in branching containers
+    _railroad.DIAGRAM_CLASS = (
+        "rd"  # class set on the root <svg> element of each diagram
+    )
+    _railroad.VS = 14  # vertical separation between two items
+    _railroad.AR = 14  # radius of the arcs used in branching containers
 
     # Generate a title and diagram for each non-terminal
     html_parts = []
@@ -33,10 +35,10 @@ def create_syntax_diagram(grammar):
             sequence = []
             for symbol in rhs:
                 if isinstance(symbol, _data_structures.NonterminalSymbol):
-                    href_to_div = '#{text}_§TOKEN§'.format(text=symbol.text)
+                    href_to_div = "#{text}_§TOKEN§".format(text=symbol.text)
                     rr_symbol = _railroad.NonTerminal(symbol.text, href_to_div)
                 else:
-                    if symbol.text == '':
+                    if symbol.text == "":
                         rr_symbol = _railroad.Skip()
                     else:
                         rr_symbol = _railroad.Terminal(symbol.text)
@@ -44,7 +46,7 @@ def create_syntax_diagram(grammar):
             rr_sequence = _railroad.Sequence(*sequence)
             rr_choices.append(rr_sequence)
         rr_content = _railroad.Choice(0, *rr_choices)
-        rr_diagram = _railroad.Diagram(rr_content, type='complex', css=None)
+        rr_diagram = _railroad.Diagram(rr_content, type="complex", css=None)
         rr_diagram.format(15)
         svg = _railroad_diagram_to_svg(rr_diagram)
         # Collect results
@@ -52,7 +54,7 @@ def create_syntax_diagram(grammar):
         html_parts.append(svg)
 
     # Convert parts to a HTML string
-    html_text = _CSS + ''.join(html_parts)
+    html_text = _CSS + "".join(html_parts)
     fig = GrammarFigure(html_text)
     return fig
 
@@ -78,7 +80,7 @@ class _RailroadOutputCollector:
     @property
     def text(self):
         """Combine all outputs to a single string."""
-        return ''.join(self.parts)
+        return "".join(self.parts)
 
 
 class GrammarFigure:
@@ -91,7 +93,8 @@ class GrammarFigure:
 
     # Representations
     def __repr__(self):
-        return '<{} object at {}>'.format(self.__class__.__name__, hex(id(self)))
+        """Compute the "official" string representation of the figure."""
+        return "<{} object at {}>".format(self.__class__.__name__, hex(id(self)))
 
     def _repr_html_(self):
         """Provide rich display representation in HTML format for Jupyter notebooks."""
@@ -108,7 +111,7 @@ class GrammarFigure:
 
         """
         if inline:
-            from IPython.display import display, HTML
+            from IPython.display import HTML, display
 
             display(HTML(self.html_text_partial))
         else:
@@ -129,7 +132,7 @@ class GrammarFigure:
     @property
     def html_text_partial(self):
         """Create a partial HTML text representation without html, head and body tags."""
-        html_text = self._html_template.replace('§TOKEN§', self._generate_random_id())
+        html_text = self._html_template.replace("§TOKEN§", self._generate_random_id())
         return html_text
 
     # Export as HTML file (interactive)
@@ -151,17 +154,17 @@ class GrammarFigure:
 
         """
         # Precondition
-        used_filepath = _operating_system.ensure_file_extension(filepath, 'html')
+        used_filepath = _operating_system.ensure_file_extension(filepath, "html")
 
         # Transformation
-        with open(used_filepath, 'w') as file_handle:
+        with open(used_filepath, "w", encoding="utf-8") as file_handle:
             file_handle.write(self.html_text)
         return used_filepath
 
     @staticmethod
     def _generate_random_id(length=32):
         symbols = _string.ascii_letters + _string.digits
-        return 'r' + ''.join(_random.choice(symbols) for _ in range(length))
+        return "r" + "".join(_random.choice(symbols) for _ in range(length))
 
 
 _HTML = """<!DOCTYPE html>

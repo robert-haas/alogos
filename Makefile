@@ -8,10 +8,12 @@
 # References
 # - GNU Make
 #   - https://www.gnu.org/software/make
-# - Style checking
+# - Code analysis and formatting: against bugs, for consistent style
+#   - black: https://github.com/psf/black
 #   - isort: https://github.com/timothycrosley/isort
-#   - Flake8: http://flake8.pycqa.org (uses pycodestyle, pyflakes and mccabe)
-#   - Pylint: https://www.pylint.org
+#   - flake8: http://flake8.pycqa.org (uses pycodestyle, pyflakes, mccabe, ...)
+#   - flake8-bugbear: https://github.com/PyCQA/flake8-bugbear#opinionated-warnings
+#   - pydocstyle: http://www.pydocstyle.org
 # - URL checking
 #   - urlchecker: https://github.com/urlstechie/urlchecker-python
 # - Testing
@@ -50,10 +52,11 @@ help:
 	@echo "    make run-ipython   launch an IPython shell and import the installed package"
 	@echo
 	@echo "  Development"
-	@echo '    make clean         delete everything that can be generated
-	@echo "    make style-isort   stylecheck with isort (check import order)"
-	@echo "    make style-flake8  stylecheck with flake8 (check basic code conventions)"
-	@echo "    make style-pylint  stylecheck with pylint (detailed code analysis)"
+	@echo "    make clean         delete everything that can be generated"
+	@echo "    make style-black   style formatting with black (modify code, ensure consistent style)"
+	@echo "    make style-isort   style check with isort (check import order)"
+	@echo "    make style-flake8  style check with flake8 (check basic code conventions, detect bugs)"
+	@echo "    make style-pydoc   style check with pydocstyle (check docstring conventions)"
 	@echo "    make test-unit     run unit and integration tests with pytest"
 	@echo "    make test-system   run system tests in virtual environments with tox"
 	@echo "    make todo          check for TODO comments in source code with pylint"
@@ -82,9 +85,12 @@ install-edit:
 .PHONY: install-dev
 install-dev:
 	# Linting
-	pip install isort flake8 pylint
+	pip install black isort flake8 flake8-bugbear pydocstyle
 	# Testing
 	pip install pytest pytest-cov pytest-timeout tox
+	# Documentation generation
+	# - sphinx_rtd_theme==0.5.1 to ensure manually modified theme.js fits to rest
+	pip install sphinx "sphinx_rtd_theme==0.5.1" tornado jupyter nbsphinx urlchecker
 	# Upload to PyPI
 	pip install twine
 	# Package in editable form
@@ -111,8 +117,9 @@ run-ipython:
 .PHONY: clean
 clean:
 	# Directories
+	-@rm -rf docs/build
 	-@rm -rf tests/out* tests/htmlcov tests/.coverage*
-	-@rm -rf .tox
+	-@rm -rf .tox tox_results.json
 	-@rm -rf build dist
 	-@find . -type d \
 	    \( \
@@ -120,7 +127,6 @@ clean:
 	    -or -name "*.egg-info" \
 	    -or -name ".cache" \
 	    -or -name ".pytest_cache" \
-	    -or -name "dask-worker-space" \
 	    -or -name ".ipynb_checkpoints" \
 	    \) \
 	    -exec rm -rf {} \; 2> /dev/null || true
@@ -129,23 +135,33 @@ clean:
 	    -exec rm --force {} + 2> /dev/null || true
 	@echo "Deleted all unnecessary files and directories."
 
+.PHONY: docs
+docs:
+	@cd docs; \
+	rm -rf build; \
+	make html
+
+.PHONY: style-black
+style-black:
+	black setup.py $(PKG_NAME) $(TEST_DIR)
+
 .PHONY: style-isort
 style-isort:
-	isort --lines-after-imports 2 --recursive --diff $(PKG_DIR) $(TEST_DIR)
+	@isort --diff setup.py $(PKG_DIR) $(TEST_DIR)
 
 .PHONY: style-flake8
 style-flake8:
-	flake8 $(PKG_DIR) $(TEST_DIR)
+	flake8 setup.py $(PKG_DIR) $(TEST_DIR)
 
-.PHONY: style-pylint
-style-pylint:
-	pylint $(PKG_DIR) $(TEST_DIR) --disable=W0511
+.PHONY: style-pydoc
+style-pydoc:
+	pydocstyle --convention=numpy $(PKG_DIR)
 
 .PHONY: test-unit
 test-unit:
 	@cd tests; \
-	rm -rf dask-worker-space output htmlcov .coverage*; \
-	pytest --timeout=240 --cov=$(PKG_NAME) --cov-report html
+	rm -rf output htmlcov .coverage*; \
+	pytest --timeout=300 --cov=$(PKG_NAME) --cov-report html
 
 .PHONY: test-system
 test-system:

@@ -5,9 +5,9 @@ def unix_timestamp_to_readable(unix_timestamp, include_microseconds=False):
     """Convert a UNIX timestamp to a readable format."""
     now = _datetime.datetime.utcfromtimestamp(unix_timestamp)
     if include_microseconds:
-        format_str = '%Y-%m-%d %H:%M:%S %f UTC'
+        format_str = "%Y-%m-%d %H:%M:%S %f UTC"
     else:
-        format_str = '%Y-%m-%d %H:%M:%S UTC'
+        format_str = "%Y-%m-%d %H:%M:%S UTC"
     return now.strftime(format_str)
 
 
@@ -48,7 +48,7 @@ def current_time_readable(include_microseconds=False):
     now_utc = _datetime.datetime.utcnow()
     now_utc = now_utc.replace(tzinfo=_datetime.timezone.utc)
     if include_microseconds:
-        format_str = '%Y-%m-%d %H:%M:%S %f UTC'
+        format_str = "%Y-%m-%d %H:%M:%S %f UTC"
     else:
-        format_str = '%Y-%m-%d %H:%M:%S UTC'
+        format_str = "%Y-%m-%d %H:%M:%S UTC"
     return now_utc.strftime(format_str)

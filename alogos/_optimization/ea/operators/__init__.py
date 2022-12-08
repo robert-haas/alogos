@@ -1,1 +1,1 @@
-from . import pooling, selection
+from . import generation_model, selection

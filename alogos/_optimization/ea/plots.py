@@ -1,9 +1,10 @@
-def genealogy(data, graph, backend, **kwargs):
+def genealogy(graph, backend, **kwargs):
+    """Create a graph visualization of the genealogy of individuals."""
     import gravis as gv
 
-    if backend == 'd3':
+    if backend == "d3":
         fig = gv.d3(graph, **kwargs)
-    elif backend == 'vis':
+    elif backend == "vis":
         fig = gv.vis(graph, **kwargs)
     else:
         fig = gv.three(graph, **kwargs)

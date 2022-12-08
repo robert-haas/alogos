@@ -1,87 +1,122 @@
+"""Default parameters for CFG-GP-ST."""
+
 from ..._utilities.parametrization import ParameterCollection as _ParameterCollection
 
 
-default_parameters = _ParameterCollection({
-    # General
-    'population_size': 100,
-    'max_nodes': 10000,
+default_parameters = _ParameterCollection(
+    {
+        # General
+        "max_nodes": 10_000,
+        # Individual initialization
+        "init_ind_operator": "random_genotype",
+        "init_ind_given_genotype": None,
+        "init_ind_given_derivation_tree": None,
+        "init_ind_given_phenotype": None,
+        "init_ind_gp_grow_max_depth": 8,
+        "init_ind_gp_full_max_depth": 8,
+        "init_ind_pi_grow_max_depth": 8,
+        "init_ind_ptc2_max_expansions": 50,
+        # Population initialization
+        "init_pop_operator": "ptc2",
+        "init_pop_size": 100,
+        "init_pop_given_genotypes": None,
+        "init_pop_given_derivation_trees": None,
+        "init_pop_given_phenotypes": None,
+        "init_pop_gp_rhh_start_depth": 2,
+        "init_pop_gp_rhh_end_depth": 17,
+        "init_pop_pi_rhh_start_depth": 2,
+        "init_pop_pi_rhh_end_depth": 17,
+        "init_pop_ptc2_start_expansions": 20,
+        "init_pop_ptc2_end_expansions": 240,
+        "init_pop_unique_genotypes": False,
+        "init_pop_unique_phenotypes": True,
+        "init_pop_unique_max_tries": 100_000,
+        # Mutation
+        "mutation_operator": "subtree_replacement",
+        # Crossover
+        "crossover_operator": "subtree_exchange",
+        # Neighborhood
+        "neighborhood_operator": "subtree_replacement",
+        "neighborhood_distance": 1,
+        "neighborhood_max_size": 100,
+        "neighborhood_only_terminals": False,
+    }
+)
+"""Default parameters for CFG-GP-ST.
 
-    # Individual initialization
-    'init_ind_operator': 'random_genotype',
-    'init_ind_given_genotype': None,
-    'init_ind_given_derivation_tree': None,
-    'init_ind_given_phenotype': None,
-    'init_ind_grow_max_depth': 8,
-    'init_ind_full_max_depth': 8,
-    'init_ind_ptc2_max_expansions': 50,
+These values can be changed to affect the default behavior
+of CFG-GP-ST when used in a search algorithm.
+Note that the default values can also be overwritten by passing
+parameters to the constructor of a search algorithm.
 
-    # Population initialization
-    'init_pop_operator': 'ptc2',
-    'init_pop_given_genotypes': None,
-    'init_pop_given_derivation_trees': None,
-    'init_pop_given_phenotypes': None,
-    'init_pop_random_unique_genotypes': False,
-    'init_pop_random_unique_phenotypes': True,
-    'init_pop_random_unique_max_tries': 50000,
-    'init_pop_rhh_start_depth': 2,
-    'init_pop_rhh_end_depth': 17,
-    'init_pop_rhh_with_pi_grow': True,
-    'init_pop_ptc2_start_expansions': 20,
-    'init_pop_ptc2_end_expansions': 240,
+Parameters
+----------
+max_nodes : `int`, default=10_000
 
-    # Mutation
-    'mutation_operator': 'subtree_replacement',
-    'mutation_subtree_replacement_count': 1,
+init_ind_operator : `str`, default="random_genotype"
+    Possible values:
 
-    # Crossover
-    'crossover_operator': 'subtree_exchange',
-    'crossover_subtree_replacement_count': 1,
+    - ``"given_genotype"``
+    - ``"given_derivation_tree"``
+    - ``"given_phenotype"``
+    - ``"random_genotype"``
+    - ``"gp_grow_tree"``
+    - ``"pi_grow_tree"``
+    - ``"gp_full_tree"``
+    - ``"ptc2_tree"``
+init_ind_given_genotype : `~.representation.Genotype`, default=`None`
+init_ind_given_derivation_tree : `~alogos._grammar.data_structures.DerivationTree`, default=`None`
+init_ind_given_phenotype : `str`, default=`None`
+init_ind_gp_grow_max_depth : `int`, default=8
+init_ind_gp_full_max_depth : `int`, default=8
+init_ind_pi_grow_max_depth : `int`, default=8
+init_ind_ptc2_max_expansions : `int`, default=50
 
-    # Neighborhood
-    'neighborhood_operator': 'subtree_replacement',
-    'neighborhood_distance': 1,
-    'neighborhood_max_size': 100,
-    'neighborhood_only_terminals': False,
-})
+init_pop_operator : `str`, default="ptc2"
+    Possible values:
 
+    - ``"given_genotypes"``
+    - ``"given_derivation_trees"``
+    - ``"given_phenotypes"``
+    - ``"random_genotypes"``
+    - ``"gp_rhh"``
+    - ``"pi_rhh"``
+    - ``"ptc2"``
+init_pop_size : `int`, default=100
+    This parameter is used by population initialization operators.
+    Caution: Search methods like `~alogos.EvolutionaryAlgorithm` come
+    with the parameter ``population_size``, which determines the size
+    of the population both during initialization and during the search,
+    therefore overwriting the value of ``init_pop_size``.
+init_pop_given_genotypes : `list` of `~.representation.Genotype`, default=`None`
+init_pop_given_derivation_trees : `list` of `~alogos._grammar.data_structures.DerivationTree`, default=`None`
+init_pop_given_phenotypes : `list` of `str`, default=`None`
+init_pop_gp_rhh_start_depth : `int`, default=2
+init_pop_gp_rhh_end_depth : `int`, default=17
+init_pop_pi_rhh_start_depth : `int`, default=2
+init_pop_pi_rhh_end_depth : `int`, default=17
+init_pop_ptc2_start_expansions : `int`, default=20
+init_pop_ptc2_end_expansions : `int`, default=240
+init_pop_unique_genotypes : `bool`, default=False
+init_pop_unique_phenotypes : `bool`, default=True
+init_pop_unique_max_tries : `int`, default=100000
 
-default_parameters_OLD = _ParameterCollection({
-    'init_individual_operator': 'random_genotype',
-    'init_population_operator': 'random_genotypes',
-    'mutation_operator': 'subtree_replacement',
-    'crossover_operator': 'subtree_exchange',
+mutation_operator : `str`, default="subtree_replacement"
+    Possible values:
 
-    'init_genotype': None,
-    'init_genotypes': None,
-    'init_derivation_tree': None,
-    'init_pop_given_derivation_trees': None,
-    'init_phenotype': None,
-    'init_pop_given_phenotypes': None,
-    'init_pop_random_unique_genotypes': False,
-    'init_pop_random_unique_phenotypes': True,
-    'init_pop_random_unique_max_tries': 50000,
+    - ``"subtree_replacement"``
 
-    'init_grow_max_depth': 8,
-    'init_full_max_depth': 8,
+crossover_operator : `str`, default="subtree_exchange"
+    Possible values:
 
-    'init_ptc2_max_expansions': 20,
-    'init_pop_ptc2_start_expansions': 20,
-    'init_pop_ptc2_end_expansions': 240,
+    - ``"subtree_exchange"``
 
-    'init_pop_rhh_start_depth': 2,
-    'init_pop_rhh_end_depth': 17,
-    'init_pop_rhh_with_pi_grow': True,
+neighborhood_operator : `str`, default="subtree_replacement"
+    Possible values:
 
-    'codon_size': 8,
-    'genotype_length': 10,
+    - ``"subtree_replacement"``
+neighborhood_distance : `int`, default=1
+neighborhood_max_size : `int`, default=100
+neighborhood_only_terminals : `bool`, default=False
 
-    'population_size': 100,
-
-    'mutation_subtree_replacement_count': 1,
-
-    'max_nodes': 20000,
-
-    'neighborhood_operator': 'node_flip',
-    'neighborhood_distance': 1,
-    'neighborhood_max_size': 1000,
-})
+"""

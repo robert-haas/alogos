@@ -1,6 +1,7 @@
-import alogos as al
-
+# flake8: noqa: W191, E101
 import shared
+
+import alogos as al
 
 
 def test_ebnf_farrell_1():
@@ -9,8 +10,8 @@ def test_ebnf_farrell_1():
     S :== 'a' [B]
     B :== {'a'}
     """
-    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol=':==')
-    shared.check_grammar(grammar, ['a', 'aa', 'aaa', 'aaaa'], ['', 'a ', 'a a', ' a'])
+    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol=":==")
+    shared.check_grammar(grammar, ["a", "aa", "aaa", "aaaa"], ["", "a ", "a a", " a"])
 
 
 def test_ebnf_farrell_2():
@@ -27,8 +28,8 @@ def test_ebnf_farrell_2():
                '4' NUMBER | '5' NUMBER | '6' NUMBER |
                '7' NUMBER | '8' NUMBER | '9' NUMBER | '0' NUMBER
     """
-    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol=':==')
-    shared.check_grammar(grammar, ['42', '(2*5)+3/19'], ['', '-1'])
+    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol=":==")
+    shared.check_grammar(grammar, ["42", "(2*5)+3/19"], ["", "-1"])
 
 
 def test_ebnf_mod():
@@ -42,11 +43,11 @@ int ::= digit+
 digit ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 quoteEscapedString ::= '"C"' | '"O"'
 """
-    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol='::=')
+    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol="::=")
     shared.check_grammar(
         grammar,
-        ['graph []', 'graph [ node [id 15 label "C"] node [id 22 label "O"]]'],
-        ['', 'graph [ ]']
+        ["graph []", 'graph [ node [id 15 label "C"] node [id 22 label "O"]]'],
+        ["", "graph [ ]"],
     )
 
 
@@ -119,8 +120,10 @@ LETTER: "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | 
 DIGIT: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 WS: ' ' | '\r' | '\n' | '\t';
     """
-    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol=':')
-    shared.check_grammar(grammar, [';', '{}', 'if(helloworld);', 'while(a+b<10);'], ['', 'x', '}{'])
+    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol=":")
+    shared.check_grammar(
+        grammar, [";", "{}", "if(helloworld);", "while(a+b<10);"], ["", "x", "}{"]
+    )
 
 
 def test_ebnf_algebraic_expression():
@@ -135,7 +138,9 @@ constant   = digit {digit} .
 digit      = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" .
     """
     grammar = al.Grammar(ebnf_text=ebnf_text)
-    shared.check_grammar(grammar, ['0', '2-1', '(x+y)*7', '1+x/y*z+44'], ['', '+', 'aaba', 'aabbaab'])
+    shared.check_grammar(
+        grammar, ["0", "2-1", "(x+y)*7", "1+x/y*z+44"], ["", "+", "aaba", "aabbaab"]
+    )
 
 
 def test_ebnf_decimal_numbers():
@@ -146,9 +151,11 @@ def test_ebnf_decimal_numbers():
     """
     grammar = al.Grammar(
         ebnf_text=ebnf_text,
-        defining_symbol=':=',
-        start_nonterminal_symbol='<', end_nonterminal_symbol='>')
-    shared.check_grammar(grammar, ['-7', '3.14', '-0.1'], ['', '+-1', '1+', '1.'])
+        defining_symbol=":=",
+        start_nonterminal_symbol="<",
+        end_nonterminal_symbol=">",
+    )
+    shared.check_grammar(grammar, ["-7", "3.14", "-0.1"], ["", "+-1", "1+", "1."])
 
 
 def test_ebnf_integer():
@@ -159,7 +166,7 @@ integer = ["+"|"-"] digit {digit}
 digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 """
     grammar = al.Grammar(ebnf_text=ebnf_text)
-    shared.check_grammar(grammar, ['+1', '-15'], ['', '+', '0.2'])
+    shared.check_grammar(grammar, ["+1", "-15"], ["", "+", "0.2"])
 
 
 def test_java_float_literals_for_antlr():
@@ -169,6 +176,7 @@ def test_java_float_literals_for_antlr():
     # - ExponentIndicator [eE] to quoted terminals
     # - NonZeroDigit [1-9] to quoted terminals
     # - Sign [+-] to quoted terminals
+
     ebnf_text = """
 DecimalFloatingPointLiteral
 	:	Digits '.' Digits? ExponentPart? FloatTypeSuffix?
@@ -219,8 +227,10 @@ DigitOrUnderscore
 	|	'_'
 ;
 """
-    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol=':')
-    shared.check_grammar(grammar, ['7e-09', '.000_3f', '0.14f', '1_000_000d'], ['.', 'a'])
+    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol=":")
+    shared.check_grammar(
+        grammar, ["7e-09", ".000_3f", "0.14f", "1_000_000d"], [".", "a"]
+    )
 
 
 def test_python_import_statement():
@@ -245,8 +255,10 @@ LETTER: "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | 
       | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M"
       | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 """
-    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol=':')
-    shared.check_grammar(grammar, ['importSfromE', 'from.importLib'], ['import S from E'])
+    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol=":")
+    shared.check_grammar(
+        grammar, ["importSfromE", "from.importLib"], ["import S from E"]
+    )
 
 
 def test_rust_number_literals():
@@ -273,5 +285,7 @@ dec_digit : '0' | nonzero_dec ;
 nonzero_dec: '1' | '2' | '3' | '4'
            | '5' | '6' | '7' | '8' | '9' ;
 """
-    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol=':')
-    shared.check_grammar(grammar, ['1', '1_000', '0b011', '3.14e10', '0xFF', '0o77'], ['', '-4'])
+    grammar = al.Grammar(ebnf_text=ebnf_text, defining_symbol=":")
+    shared.check_grammar(
+        grammar, ["1", "1_000", "0b011", "3.14e10", "0xFF", "0o77"], ["", "-4"]
+    )

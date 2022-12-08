@@ -8,8 +8,9 @@ from ...._utilities.operating_system import NEWLINE as _NEWLINE
 
 # Selection operators implemented as functions with identical interface
 
+
 def uniform(individuals, sample_size, objective, parameters, state):
-    """Uniform selection via uniform sampling with replacement.
+    """Perform uniform selection via uniform sampling with replacement.
 
     References
     ----------
@@ -21,11 +22,9 @@ def uniform(individuals, sample_size, objective, parameters, state):
 
 
 def truncation(individuals, sample_size, objective, parameters, state):
-    """Truncation selection via deterministic cut-off.
+    """Perform truncation selection via deterministic cut-off.
 
     Given a population, return the best <proportion> of them.
-
-    TODO: reference
 
     """
     # Argument processing
@@ -37,23 +36,21 @@ def truncation(individuals, sample_size, objective, parameters, state):
 
     # Case 2: All individuals multiple times + best individuals as rest
     elif sample_size > num_ind:
-        srt_inds = _sort_individuals(individuals, reverse=(objective == 'max'))
+        srt_inds = _sort_individuals(individuals, reverse=(objective == "max"))
         sel_inds = [srt_inds[i % num_ind] for i in range(sample_size)]
-    
+
     # Case 3: Best individuals
     else:
-        srt_inds = _sort_individuals(individuals, reverse=(objective == 'max'))
+        srt_inds = _sort_individuals(individuals, reverse=(objective == "max"))
         sel_inds = srt_inds[:sample_size]
     return sel_inds
 
 
 def tournament(individuals, sample_size, objective, parameters, state):
-    """Tournament selection via sampling with replacement.
+    """Perform tournament selection via sampling with replacement.
 
     Given a population, draw <tournament_size> competitors randomly and select the single best of
     them.
-    
-    TODO: reference
 
     """
     # Parameter processing
@@ -61,7 +58,7 @@ def tournament(individuals, sample_size, objective, parameters, state):
 
     # Perform tournaments and keep the winner of each
     sel_inds = []
-    if objective == 'min':
+    if objective == "min":
         for _ in range(sample_size):
             competitors = _uniform_sampling_with_replacement(individuals, ts)
             winner = competitors[0]
@@ -81,15 +78,12 @@ def tournament(individuals, sample_size, objective, parameters, state):
 
 
 def rank_proportional(individuals, sample_size, objective, parameters, state):
-    """Rank-proportional selection with linear scaling.
-    
-    TODO: reference
-    """
+    """Perform rank-proportional selection with linear scaling."""
     # Sorting
-    srt_inds = _sort_individuals(individuals, reverse=(objective == 'max'))
+    srt_inds = _sort_individuals(individuals, reverse=(objective == "max"))
 
     # Probability calculation based on ranks
-    num_inds = len(srt_inds) 
+    num_inds = len(srt_inds)
     mu = len(srt_inds)
     eta_plus = 1.5
     probabilities = _calculate_rank_probabilities(num_inds, mu, eta_plus)
@@ -100,10 +94,10 @@ def rank_proportional(individuals, sample_size, objective, parameters, state):
 
 
 def fitness_proportional(individuals, sample_size, objective, parameters, state):
-    """Fitness-proportional selection with linear scaling.
-    
+    """Perform fitness-proportional selection with linear scaling.
+
     Considerations for special float values:
-    
+
     - NaN values are ignored, i.e. the individual has 0.0% chance of being selected.
     - +Inf values are 1) ignored in minimization or 2) replaced by a large positive number in
       maximization.
@@ -127,23 +121,30 @@ def fitness_proportional(individuals, sample_size, objective, parameters, state)
 
 # Functions called by some operators
 
+
 @_lru_cache(maxsize=8)
 def _calculate_rank_probabilities(num_inds, mu, eta_plus):
-    """Probabilities stay the same if mu and eta_plus do not change, hence using a cache."""
+    """Calculate probabilities for rank-proportional selection.
+
+    Note that the probabilities stay the same if mu and eta_plus do not
+    change, therefore they can be cached to prevent recalculation.
+
+    """
     # Use ranks from 0 to n-1 (in range) instead of 1 to n => formula without -1
     mu_inv = 1.0 / mu
     mu_minus_1 = mu - 1.0
     eta_minus = 2.0 - eta_plus
     eta_diff = eta_plus - eta_minus
-    probabilities = [mu_inv * (eta_minus + eta_diff * r_i / mu_minus_1)
-                     for r_i in range(num_inds)]
+    probabilities = [
+        mu_inv * (eta_minus + eta_diff * r_i / mu_minus_1) for r_i in range(num_inds)
+    ]
     return probabilities
 
 
 def _preprocess_nonfinite_fitnesses(individuals, objective):
-    float_max = 1.7976931348623157e+308
+    float_max = 1.7976931348623157e308
     float_large_pos = float_max / 10e7
-    float_min = -1.7976931348623157e+308
+    float_min = -1.7976931348623157e308
     float_large_neg = float_min / 10e7
     fitnesses = []
     usage_tracking = []
@@ -158,7 +159,7 @@ def _preprocess_nonfinite_fitnesses(individuals, objective):
             usage_tracking.append(False)
         elif fitness > 0.0:
             # +Inf
-            if objective == 'min':
+            if objective == "min":
                 # Ignored in minimization, considered as no fitness
                 usage_tracking.append(False)
             else:
@@ -167,7 +168,7 @@ def _preprocess_nonfinite_fitnesses(individuals, objective):
                 usage_tracking.append(True)
         else:
             # -Inf
-            if objective == 'max':
+            if objective == "max":
                 # Ignored in maximization, considered as no fitness
                 usage_tracking.append(False)
             else:
@@ -182,7 +183,7 @@ def _preprocess_nonfinite_fitnesses(individuals, objective):
 
 def _linear_scaling(fitnesses, objective):
     """Shift the input range to a positive one from 0 (worst) to some positive value (best)."""
-    if objective == 'max':
+    if objective == "max":
         worst_fitness = min(fitnesses)
         scaled_fitnesses = [fitness - worst_fitness for fitness in fitnesses]
     else:
@@ -214,6 +215,7 @@ def _calculate_fitness_probabilities(scaled_fitnesses, usage_tracking):
 
 # Custom sorting algorithm: NaN values need to be treated properly depending on objective
 
+
 def _sort_individuals(individuals, reverse=False):
     # Separate: individuals with a number as fitness and those with NaN
     inds_val = [ind for ind in individuals if ind.fitness == ind.fitness]
@@ -221,12 +223,13 @@ def _sort_individuals(individuals, reverse=False):
 
     # Sort
     inds_val_sort = sorted(inds_val, key=lambda x: x.fitness, reverse=reverse)
-    
+
     # Recombine
     return inds_val_sort + inds_nan
 
 
 # Sampling algorithms: draw individuals from a population according to a probability distribution
+
 
 def _uniform_sampling_with_replacement(population, sample_size):
     """Uniform sampling with replacement."""
@@ -262,19 +265,21 @@ def _stochastic_universal_sampling(population, probabilities, sample_size):
 
     # Construct the population of selected individuals
     selected_individuals = []
-    for idx, num_children in enumerate(num_children):
-        for _ in range(num_children):
+    for idx, num in enumerate(num_children):
+        for _ in range(num):
             selected_individuals.append(population[idx])
 
     if len(selected_individuals) != sample_size:
         message = (
-            'Stochastic uniform sampling failed.{nl}'
-            'Sum of provided probabilities: {prob}{nl}'
-            'Number of sampled individuals: {ind}{nl}'
-            'Wanted sample size: {spl}{nl}'.format(
+            "Stochastic uniform sampling failed.{nl}"
+            "Sum of provided probabilities: {prob}{nl}"
+            "Number of sampled individuals: {ind}{nl}"
+            "Wanted sample size: {spl}{nl}".format(
                 nl=_NEWLINE,
                 prob=sum(probabilities),
                 ind=len(selected_individuals),
-                spl=sample_size))
+                spl=sample_size,
+            )
+        )
         raise ValueError(message)
     return selected_individuals

@@ -9,7 +9,7 @@ from .. import data_structures as _data_structures
 # Shortcuts
 _NT = _data_structures.NonterminalSymbol
 _T = _data_structures.TerminalSymbol
-_BACKSLASH = '\\'  # Caution: r'\' is not a valid string literal
+_BACKSLASH = "\\"  # Caution: r'\' is not a valid string literal
 
 
 def parse_string(grammar, string, parser, get_multiple_trees, max_num_trees=None):
@@ -29,17 +29,29 @@ def parse_string(grammar, string, parser, get_multiple_trees, max_num_trees=None
 
     """
     # Argument processing
-    string = _ap.str_arg('string', string)
-    parser = _ap.str_arg('parser', parser, vals=['earley', 'lalr'])
-    get_multiple_trees = _ap.bool_arg('get_multiple_trees', get_multiple_trees, default=False)
-    max_num_trees = _ap.int_arg('max_num_trees', max_num_trees, default=1_000_000_000_000)
-    if get_multiple_trees and parser != 'earley':
-        _exceptions._raise_value_error_lark()
+    string = _ap.str_arg("string", string)
+    parser = _ap.str_arg("parser", parser, vals=["earley", "lalr"])
+    get_multiple_trees = _ap.bool_arg(
+        "get_multiple_trees", get_multiple_trees, default=False
+    )
+    max_num_trees = _ap.int_arg(
+        "max_num_trees", max_num_trees, default=1_000_000_000_000
+    )
+    if get_multiple_trees and parser != "earley":
+        _exceptions.raise_lark_parser_mult_error()
 
     # Caching: Create the Lark parser once and reuse it in subsequent calls
-    parser_id = parser if parser == 'lalr' else '{}{}'.format(parser, int(get_multiple_trees))
+    parser_id = (
+        parser if parser == "lalr" else "{}{}".format(parser, int(get_multiple_trees))
+    )
     lark_parser, nt_map_fwd, nt_map_rev = grammar._lookup_or_calc(
-        'lark', parser_id, _calc_lark_parser_and_nt_maps, grammar, parser, get_multiple_trees)
+        "lark",
+        parser_id,
+        _calc_lark_parser_and_nt_maps,
+        grammar,
+        parser,
+        get_multiple_trees,
+    )
 
     # Parsing
     try:
@@ -49,7 +61,9 @@ def parse_string(grammar, string, parser, get_multiple_trees, max_num_trees=None
 
     # Tree conversion
     if get_multiple_trees:
-        tree_s = _ambig_lark_tree_to_dts(grammar, tree_s, nt_map_fwd, nt_map_rev, max_num_trees)
+        tree_s = _ambig_lark_tree_to_dts(
+            grammar, tree_s, nt_map_fwd, nt_map_rev, max_num_trees
+        )
     else:
         tree_s = _lark_tree_to_dt(grammar, tree_s, nt_map_rev)
     return tree_s
@@ -57,8 +71,10 @@ def parse_string(grammar, string, parser, get_multiple_trees, max_num_trees=None
 
 # Result conversion
 
+
 def _lark_tree_to_dt(grammar, lark_tree, nt_map_rev):
     """Convert a parse tree of lark-parser into a derivation tree of this package."""
+
     def get_label(lark_node):
         if isinstance(lark_node, _lark.Tree):
             return _NT(nt_map_rev[lark_node.data].text)
@@ -79,7 +95,7 @@ def _lark_tree_to_dt(grammar, lark_tree, nt_map_rev):
             child_symbols = [get_label(child) for child in lark_child_nodes]
             if not child_symbols:
                 # Empty string is not a node in the Lark tree and hence needs special treatment
-                empty_string = _T('')
+                empty_string = _T("")
                 child_symbols = [empty_string]
                 dt._expand(ori_node, child_symbols)
                 continue
@@ -99,7 +115,7 @@ def _ambig_lark_tree_to_dts(grammar, lark_tree, nt_map_fwd, nt_map_rev, max_num_
         candidate_tree = stack.pop()
         node_label = candidate_tree.data
         # "_ambig" in a node means that multiple trees are present in the child nodes
-        if node_label == '_ambig':
+        if node_label == "_ambig":
             new_candidate_trees = candidate_tree.children
             stack.extend(new_candidate_trees)
         elif node_label == lark_start_symbol:
@@ -117,6 +133,7 @@ def _ambig_lark_tree_to_dts(grammar, lark_tree, nt_map_fwd, nt_map_rev, max_num_
 
 # Cached calculations
 
+
 def _calc_lark_parser_and_nt_maps(grammar, parser, get_multiple_trees):
     """Create all Lark objects in a single function.
 
@@ -127,20 +144,26 @@ def _calc_lark_parser_and_nt_maps(grammar, parser, get_multiple_trees):
     """
     # Nonterminal maps
     nt_map_fwd, nt_map_rev = grammar._lookup_or_calc(
-        'lark', 'nt_maps', _calc_nonterminal_maps, grammar)
+        "lark", "nt_maps", _calc_nonterminal_maps, grammar
+    )
 
     # Lark grammar
     lark_grammar = grammar._lookup_or_calc(
-        'lark', 'grammar', _calc_lark_grammar, grammar, nt_map_fwd)
+        "lark", "grammar", _calc_lark_grammar, grammar, nt_map_fwd
+    )
 
     # Lark parser: different parsers are created from the same nonterminal maps and Lark grammar
-    lark_parser = _calc_lark_parser(grammar, parser, nt_map_fwd, lark_grammar, get_multiple_trees)
+    lark_parser = _calc_lark_parser(
+        grammar, parser, nt_map_fwd, lark_grammar, get_multiple_trees
+    )
     return lark_parser, nt_map_fwd, nt_map_rev
 
 
 def _calc_nonterminal_maps(grammar):
     """Create a mapping between nonterminals of the original grammar and simplified symbols."""
-    nt_map_fwd = {nt: 'nt{}'.format(i) for i, nt in enumerate(grammar.nonterminal_symbols)}
+    nt_map_fwd = {
+        nt: "nt{}".format(i) for i, nt in enumerate(grammar.nonterminal_symbols)
+    }
     nt_map_rev = {val: key for key, val in nt_map_fwd.items()}
     return nt_map_fwd, nt_map_rev
 
@@ -158,19 +181,19 @@ def _calc_lark_grammar(grammar, nt_map_fwd):
         # Add a new lhs
         parts.append(_NEWLINE)
         used_text = nt_map_fwd[lhs]
-        parts.append(used_text + ': ')
+        parts.append(used_text + ": ")
 
         # Add one or several rhs to this new lhs. If several, they are separted by | as "or" symbol
         for rhs in rhs_multiple:
             for symbol in rhs:
                 if isinstance(symbol, _NT):
-                    parts.append(nt_map_fwd[symbol] + ' ')
+                    parts.append(nt_map_fwd[symbol] + " ")
                 else:
-                    parts.append(_to_lark_terminal(symbol.text) + ' ')
-            parts.append('| ')
+                    parts.append(_to_lark_terminal(symbol.text) + " ")
+            parts.append("| ")
         parts.pop()  # Remove last separator symbol
-    parts.pop(0)     # Remove first newline
-    lark_grammar = ''.join(parts)
+    parts.pop(0)  # Remove first newline
+    lark_grammar = "".join(parts)
     return lark_grammar
 
 
@@ -184,8 +207,8 @@ def _calc_lark_parser(grammar, parser, nt_map_fwd, lark_grammar, get_multiple_tr
     """
     # Argument processing
     specific_options = dict()
-    if parser == 'earley' and get_multiple_trees:
-        specific_options = dict(ambiguity='explicit')
+    if parser == "earley" and get_multiple_trees:
+        specific_options = dict(ambiguity="explicit")
 
     # Create the parser
     try:
@@ -220,15 +243,15 @@ def _to_lark_terminal(symbol):
 
         # A double quote symbol would end the terminal too early and lead to downstream problems
         if '"' in symbol:
-            symbol = symbol.replace('"', r'\"')
+            symbol = symbol.replace('"', r"\"")
 
         # For some reason a newline symbol is not allowed and needs to be replaced with its
         # escape sequence representation
-        if '\n' in symbol:
-            symbol = symbol.replace('\n', r'\n')
+        if "\n" in symbol:
+            symbol = symbol.replace("\n", r"\n")
 
         # Enclose the safe symbol in double quotes for Lark
         lark_terminal_symbol = '"{}"'.format(symbol)
     else:
-        lark_terminal_symbol = ''
+        lark_terminal_symbol = ""
     return lark_terminal_symbol

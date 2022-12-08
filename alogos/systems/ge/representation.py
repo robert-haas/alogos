@@ -1,77 +1,82 @@
-from .. import _shared
+"""Representations for GE."""
+
 from ... import exceptions as _exceptions
+from .. import _shared
 
 
-_LABEL = 'GE'
+_LABEL = "GE"
 
 
 class Genotype(_shared.representation.BaseGenotype):
-    """Genotype for Grammatical Evolution (GE)."""
+    """GE genotype."""
 
     __slots__ = ()
     _label = _LABEL
 
     def __init__(self, data):
-        """Initialize an unmutable genotype with data that defines its identity permanently.
+        """Create a GE genotype with immutable data.
 
         Parameters
         ----------
-        data : tuple of int, list of int, string representation of the former
-            In any case, the provided data is converted to a tuple of int.
+        data : `tuple` of `int`, or `list` of `int`, or `str` representation of one of the former options
+            The provided data is converted to the first form.
 
-            Examples:
+        Examples
+        --------
+        The argument `data` could get following values of different
+        types that all lead to the same result:
 
-            - ``(177, 29, 113, 4, 55, 13, 220)``
-            - ``[177, 29, 113, 4, 55, 13, 220]``
-            - ``"(177, 29, 113, 4, 55, 13, 220)"``
-            - ``"[177, 29, 113, 4, 55, 13, 220]"``
+        - ``(177, 29, 113, 4, 55, 13, 220)``
+        - ``[177, 29, 113, 4, 55, 13, 220]``
+        - ``"(177, 29, 113, 4, 55, 13, 220)"``
+        - ``"[177, 29, 113, 4, 55, 13, 220]"``
 
         Raises
         ------
-        :py:class:`~alogos.exceptions.GenotypeError`
-            Raised when the provided data can not be converted to the desired form.
+        GenotypeError
+            If the provided data can not be converted to the desired
+            form.
 
         """
         # Immutable data attribute
-        object.__setattr__(self, 'data', self._convert_input(data))
+        object.__setattr__(self, "data", self._convert_input(data))
 
     def _convert_input(self, data):
+        """Convert different genotype formats to a single one."""
         if not isinstance(data, tuple) or not data:
             try:
                 if isinstance(data, str):
-                    # String to tuple
                     data = tuple(eval(data))
                 elif isinstance(data, list):
-                    # List to tuple
                     data = tuple(data)
                 else:
                     raise TypeError
-                # Quick check
                 assert isinstance(data[0], int)
             except Exception:
                 _exceptions.raise_ge_genotype_error(data)
         return data
 
-    # Representation
     def _repr_pretty_(self, p, cycle):
-        p.text(str(self) if not cycle else '...')
+        p.text(str(self) if not cycle else "...")
 
 
 class Individual(_shared.representation.BaseIndividual):
-    """Individual for Grammatical Evolution (GE)."""
+    """GE individual having a GE genotype."""
 
     __slots__ = ()
     _label = _LABEL
 
     def _repr_pretty_(self, p, cycle):
-        p.text(str(self) if not cycle else '...')
+        """Provide rich display representation for IPython and Jupyter."""
+        p.text(str(self) if not cycle else "...")
 
 
 class Population(_shared.representation.BasePopulation):
-    """Population for Grammatical Evolution (GE)."""
+    """GE population consisting of GE individuals."""
 
     __slots__ = ()
     _label = _LABEL
 
     def _repr_pretty_(self, p, cycle):
-        p.text(str(self) if not cycle else '...')
+        """Provide rich display representation for IPython and Jupyter."""
+        p.text(str(self) if not cycle else "...")

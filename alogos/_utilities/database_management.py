@@ -32,28 +32,28 @@ class Sqlite3Wrapper:
         References
         ----------
         - https://docs.python.org/3/library/sqlite3.html#sqlite3.connect
-        
+
             - You can use ":memory:" to open a database connection to a
               database that resides in RAM instead of on disk.
 
         - https://www.sqlite.org/wal.html
-        
+
             - On success, the pragma will return the string "wal"
-        
+
         - https://www.sqlite.org/pragma.html#pragma_synchronous
-        
+
             - The synchronous=NORMAL setting is a good choice for most
               applications running in WAL mode.
 
         """
         self.connection = _sqlite3.connect(database_location)
 
-        # 
+        #
         if try_to_use_wal:
             try:
-                result = self.execute_query('PRAGMA journal_mode=WAL;')
-                if result[0][0] == 'wal':
-                    self.execute_query('PRAGMA synchronous=NORMAL;')
+                result = self.execute_query("PRAGMA journal_mode=WAL;")
+                if result[0][0] == "wal":
+                    self.execute_query("PRAGMA synchronous=NORMAL;")
             except Exception:
                 pass
 
@@ -153,9 +153,9 @@ class Sqlite3Wrapper:
         - https://sqlite.org/lang_corefunc.html#sqlite_version
 
         """
-        result = self.execute_query('SELECT SQLITE_VERSION();')
+        result = self.execute_query("SELECT SQLITE_VERSION();")
         version = result[0][0]
-        return 'SQLite v{}'.format(version)
+        return "SQLite v{}".format(version)
 
     def get_table_names(self):
         """Get a list of tables contained in the database.
@@ -169,7 +169,9 @@ class Sqlite3Wrapper:
         - https://sqlite.org/fileformat.html#storage_of_the_sql_database_schema
 
         """
-        result = self.execute_query('SELECT name FROM sqlite_master WHERE type="table";')
+        result = self.execute_query(
+            'SELECT name FROM sqlite_master WHERE type="table";'
+        )
         table_names = [row[0] for row in result]
         return table_names
 
@@ -207,7 +209,7 @@ class Sqlite3Wrapper:
         - https://stackoverflow.com/questions/947215/how-to-get-a-list-of-column-names-on-sqlite3-database
 
         """
-        result = self.execute_query('SELECT name FROM PRAGMA_TABLE_INFO(?);', [name])
+        result = self.execute_query("SELECT name FROM PRAGMA_TABLE_INFO(?);", [name])
         header_names = [row[0] for row in result]
         return header_names
 
@@ -224,7 +226,7 @@ class Sqlite3Wrapper:
         tables = self.get_table_names()
         data = dict()
         for table in tables:
-            data[table] = self.execute_query('SELECT * FROM {};'.format(table))
+            data[table] = self.execute_query("SELECT * FROM {};".format(table))
         return data
 
     def get_num_changes(self):
@@ -288,9 +290,9 @@ class Sqlite3Wrapper:
         self._check_filepath(filepath)
 
         # Export
-        with open(filepath, 'w') as file_handle:
+        with open(filepath, "w", encoding="utf-8") as file_handle:
             for line in self.connection.iterdump():
-                file_handle.write('{}\n'.format(line))
+                file_handle.write("{}\n".format(line))
 
     def export_csv(self, filepath, name=None, include_header=True):
         """Export a chosen table or view of the database to a CSV file at a given filepath.
@@ -313,9 +315,9 @@ class Sqlite3Wrapper:
         if name is None:
             # Recursive call for each table name, if no name was provided by the user
             names = self.get_table_names()
-            if filepath.endswith('.csv'):
+            if filepath.endswith(".csv"):
                 filepath = filepath[:-4]
-            filepaths = ['{}_{}.csv'.format(filepath, name) for name in names]
+            filepaths = ["{}_{}.csv".format(filepath, name) for name in names]
             for fp in filepaths:
                 self._check_filepath(fp)
             for fp, name in zip(filepaths, names):
@@ -326,17 +328,17 @@ class Sqlite3Wrapper:
             table_names = self.get_table_names()
             view_names = self.get_view_names()
             if name not in table_names and name not in view_names:
-                raise ValueError('The provided name is not a known table or view.')
+                raise ValueError("The provided name is not a known table or view.")
 
             # Export
-            with open(filepath, 'w') as csv_file:
-                csv_writer = _csv.writer(csv_file, delimiter=',')
+            with open(filepath, "w", encoding="utf-8") as csv_file:
+                csv_writer = _csv.writer(csv_file, delimiter=",")
                 # Header
                 if include_header:
                     header = self.get_header_names(name)
                     csv_writer.writerow(header)
                 # Rows
-                rows = self.execute_query('select * from {};'.format(name))
+                rows = self.execute_query("select * from {};".format(name))
                 csv_writer.writerows(rows)
 
     @staticmethod
@@ -350,8 +352,11 @@ class Sqlite3Wrapper:
 
         """
         if _os.path.exists(filepath):
-            object_at_filepath = 'file' if _os.path.isfile(filepath) else 'directory'
+            object_at_filepath = "file" if _os.path.isfile(filepath) else "directory"
             message = (
                 'Cannot export data to the filepath "{}". '
-                'There already is a {} with that path.'.format(filepath, object_at_filepath))
+                "There already is a {} with that path.".format(
+                    filepath, object_at_filepath
+                )
+            )
             raise FileExistsError(message)

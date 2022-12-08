@@ -1,5 +1,7 @@
-from ..._grammar import data_structures as _data_structures
+"""Shared helper functions of mapping methods for several systems."""
+
 from ... import exceptions as _exceptions
+from ..._grammar import data_structures as _data_structures
 
 
 def get_derivation_tree(grammar, data):

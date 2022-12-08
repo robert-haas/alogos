@@ -1,6 +1,5 @@
 import os as _os
 import re as _re
-import sys as _sys
 
 
 NEWLINE = _os.linesep
@@ -19,8 +18,8 @@ def ensure_file_extension(filepath, extension):
         raise ValueError('Invalid filepath: "{}"'.format(filepath))
     if not extension:
         raise ValueError('Invalid extension: "{}"'.format(filepath))
-    if not extension.startswith('.'):
-        extension = '.' + extension
+    if not extension.startswith("."):
+        extension = "." + extension
 
     # Transformation
     if not filepath.endswith(extension):
@@ -30,6 +29,17 @@ def ensure_file_extension(filepath, extension):
     if not filepath or not isinstance(filepath, str):
         raise ValueError('Could not create a valid filepath: "{}"'.format(filepath))
     return filepath
+
+
+def delete_file(filepath):
+    """Delete a file.
+
+    References
+    ----------
+    - https://docs.python.org/3/library/os.html#os.remove
+
+    """
+    _os.remove(filepath)
 
 
 def ensure_new_path(path):
@@ -45,26 +55,27 @@ def ensure_new_path(path):
     - If ``x_1.y_2.z.txt`` exists, it becomes ``x_1.y_2.z_1.txt``, then ``x_1.y_2.z_2.txt``, ...
 
     """
+
     def parse_type1(string):
         try:
-            match = _re.search(r'(?P<base>.*?_)(?P<num>\d+)(?P<ext>\.[^\.]+)$', string)
-            result = match.group('base'), match.group('num'), match.group('ext')
+            match = _re.search(r"(?P<base>.*?_)(?P<num>\d+)(?P<ext>\.[^\.]+)$", string)
+            result = match.group("base"), match.group("num"), match.group("ext")
         except Exception:
             result = None
         return result
 
     def parse_type2(string):
         try:
-            match = _re.search(r'(?P<base>.*?)(?P<ext>\.[^\.]+)$', string)
-            result = match.group('base'), match.group('ext')
+            match = _re.search(r"(?P<base>.*?)(?P<ext>\.[^\.]+)$", string)
+            result = match.group("base"), match.group("ext")
         except Exception:
             result = None
         return result
 
     def parse_type3(string):
         try:
-            match = _re.search(r'(?P<base>.*?_)(?P<num>\d+)$', string)
-            result = match.group('base'), match.group('num')
+            match = _re.search(r"(?P<base>.*?_)(?P<num>\d+)$", string)
+            result = match.group("base"), match.group("num")
         except Exception:
             result = None
         return result
@@ -78,12 +89,12 @@ def ensure_new_path(path):
             path = base + str(int(num) + 1) + ext
         elif res2 is not None:
             base, ext = res2
-            path = base + '_1' + ext
+            path = base + "_1" + ext
         elif res3 is not None:
             base, num = res3
             path = base + str(int(num) + 1)
         else:
-            path = path + '_1'
+            path = path + "_1"
     return path
 
 
@@ -101,7 +112,9 @@ def create_directory(dirpath):
     return dirpath
 
 
-def open_in_webbrowser(html_text, start_delay=0.1, stop_delay_fast=0.25, stop_delay_slow=10.0):
+def open_in_webbrowser(
+    html_text, start_delay=0.1, stop_delay_fast=0.25, stop_delay_slow=10.0
+):
     """Open the given HTML text in the default webbrowser.
 
     A short-lived local HTTP server is created that serves HTML text, so that
@@ -149,10 +162,10 @@ def open_in_webbrowser(html_text, start_delay=0.1, stop_delay_fast=0.25, stop_de
     class MyHandler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
             """Serve the given HTML text to a GET request from the webbrowser."""
-            self.send_response(200, 'OK')
-            self.send_header('Content-type', 'text/html')
+            self.send_response(200, "OK")
+            self.send_header("Content-type", "text/html")
             self.end_headers()
-            self.wfile.write(bytes(html_text, 'utf-8'))
+            self.wfile.write(bytes(html_text, "utf-8"))
             # Start thread 3: Stop the server quickly after the first GET request was received
             if not timer_stop_fast.is_alive():
                 timer_stop_fast.start()
@@ -160,20 +173,23 @@ def open_in_webbrowser(html_text, start_delay=0.1, stop_delay_fast=0.25, stop_de
         def log_message(self, format, *args):
             """Show no log messages."""
 
-    local_host = '127.0.0.1'
+    local_host = "127.0.0.1"
     for _ in range(13):
         try:
-            random_port = random.randint(49152, 65535)  # port range used for "temporary purposes"
+            random_port = random.randint(
+                49152, 65535
+            )  # port range used for "temporary purposes"
             server_address = (local_host, random_port)
             server = http.server.HTTPServer(server_address, MyHandler)
-            url = 'http://{}:{}'.format(local_host, random_port)
+            url = "http://{}:{}".format(local_host, random_port)
             break
         except Exception:
             pass
     else:
         message = (
-            'Could not start a local webserver for serving HTML text to a webbrowser. '
-            'No free port could be found.')
+            "Could not start a local webserver for serving HTML text to a webbrowser. "
+            "No free port could be found."
+        )
         raise OSError(message)
 
     # Define threads 1 to 3

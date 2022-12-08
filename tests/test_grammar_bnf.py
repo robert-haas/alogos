@@ -1,62 +1,58 @@
 import os
 
 import pytest
+import shared
 
 import alogos as al
 
-import shared
-
 
 TESTFILE_DIR = os.path.dirname(shared.get_path_of_this_file())
-IN_DIR = os.path.join(TESTFILE_DIR, 'in')
+IN_DIR = os.path.join(TESTFILE_DIR, "in")
 
 
 # Read BNF from file
 
+
 def test_bnf_file_simple():
-    filepath = os.path.join(IN_DIR, 'bnf_examples', 'simple_test_grammar.bnf')
+    filepath = os.path.join(IN_DIR, "bnf_examples", "simple_test_grammar.bnf")
     grammar = al.Grammar(bnf_file=filepath)
-    shared.check_grammar(
-        grammar,
-        ['7xR', '8yS', '9xS'],
-        ['', 'X', '21']
-    )
+    shared.check_grammar(grammar, ["7xR", "8yS", "9xS"], ["", "X", "21"])
 
 
 def test_bnf_file_symbolic_regression():
-    filepath = os.path.join(IN_DIR, 'bnf_examples', 'symbolic_regression.bnf')
+    filepath = os.path.join(IN_DIR, "bnf_examples", "symbolic_regression.bnf")
     grammar = al.Grammar(bnf_file=filepath)
     shared.check_grammar(
-        grammar,
-        ['x', 'y', 'x+x', 'y*x', 'x/y-x*y'],
-        ['', '+', '+x', 'X']
+        grammar, ["x", "y", "x+x", "y*x", "x/y-x*y"], ["", "+", "+x", "X"]
     )
 
 
 def test_bnf_file_syntax_for_bnf():
     # https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form#Further_examples
     # Required modifications: <EOL> :: "\n"
-    filepath = os.path.join(IN_DIR, 'bnf_examples', 'bnf_syntax_quoted.bnf')
+    filepath = os.path.join(IN_DIR, "bnf_examples", "bnf_syntax_quoted.bnf")
     grammar = al.Grammar(
         bnf_file=filepath,
-        start_terminal_symbol='"', end_terminal_symbol='"',
-        start_terminal_symbol2="'", end_terminal_symbol2="'")
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+        start_terminal_symbol2="'",
+        end_terminal_symbol2="'",
+    )
 
-    string1 = '''<A> ::= "1" | <B>
+    string1 = """<A> ::= "1" | <B>
 <B> ::= "3" | "4"
-'''
-    string2 = '''<PostalNumber> ::= "123" | <OrIsit> "456"
+"""
+    string2 = """<PostalNumber> ::= "123" | <OrIsit> "456"
 <OrIsit> ::= <OrIsit> "7" | "8"
-'''
+"""
 
     shared.check_grammar(
-        grammar,
-        [string1, string2],
-        ['', '<A ::= "1" | "2"', '<A> ::']
+        grammar, [string1, string2], ["", '<A ::= "1" | "2"', "<A> ::"]
     )
 
 
 # Read BNF from string
+
 
 def test_bnf_simple_1():
     # Nonterminals enclosed, terminals standalone
@@ -68,9 +64,9 @@ def test_bnf_simple_1():
     grammar = al.Grammar(bnf_text=bnf_text)
     shared.check_grammar(
         grammar,
-        ['helloworld', 'hiuniverse', 'heyeverything'],
-        ['hello', 'world', 'hi', 'universe', 'hey', 'everything'],
-        language=['helloworld', 'hiuniverse', 'heyeverything'],
+        ["helloworld", "hiuniverse", "heyeverything"],
+        ["hello", "world", "hi", "universe", "hey", "everything"],
+        language=["helloworld", "hiuniverse", "heyeverything"],
     )
 
 
@@ -82,15 +78,20 @@ greeting_1 := "hi universe" | greeting-2
 greeting-2 := 'hey everything'
 """
     grammar = al.Grammar(
-        bnf_text=bnf_text, defining_symbol=':=',
-        start_nonterminal_symbol='', end_nonterminal_symbol='',
-        start_terminal_symbol='"', end_terminal_symbol='"',
-        start_terminal_symbol2="'", end_terminal_symbol2="'")
+        bnf_text=bnf_text,
+        defining_symbol=":=",
+        start_nonterminal_symbol="",
+        end_nonterminal_symbol="",
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+        start_terminal_symbol2="'",
+        end_terminal_symbol2="'",
+    )
     shared.check_grammar(
         grammar,
-        ['hello world', 'hi universe', 'hey everything'],
-        ['hello', 'world', 'hi', 'universe', 'hey', 'everything'],
-        language=['hello world', 'hi universe', 'hey everything'],
+        ["hello world", "hi universe", "hey everything"],
+        ["hello", "world", "hi", "universe", "hey", "everything"],
+        language=["hello world", "hi universe", "hey everything"],
     )
 
 
@@ -102,15 +103,20 @@ def test_bnf_simple_3():
 {{greeting 2] := 'hey everything'
 """
     grammar = al.Grammar(
-        bnf_text=bnf_text, defining_symbol=':=',
-        start_nonterminal_symbol='{{', end_nonterminal_symbol=']',
-        start_terminal_symbol='"', end_terminal_symbol='"',
-        start_terminal_symbol2="'", end_terminal_symbol2="'")
+        bnf_text=bnf_text,
+        defining_symbol=":=",
+        start_nonterminal_symbol="{{",
+        end_nonterminal_symbol="]",
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+        start_terminal_symbol2="'",
+        end_terminal_symbol2="'",
+    )
     shared.check_grammar(
         grammar,
-        ['hello world', 'hi universe', 'hey everything'],
-        ['hello', 'world', 'hi', 'universe', 'hey', 'everything'],
-        language=['hello world', 'hi universe', 'hey everything'],
+        ["hello world", "hi universe", "hey everything"],
+        ["hello", "world", "hi", "universe", "hey", "everything"],
+        language=["hello world", "hi universe", "hey everything"],
     )
 
 
@@ -121,13 +127,19 @@ def test_bnf_single_special_symbol_1():
     """
     grammar = al.Grammar(
         bnf_text=bnf_text,
-        start_terminal_symbol='"', end_terminal_symbol='"',
-        start_terminal_symbol2="'", end_terminal_symbol2="'")
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+        start_terminal_symbol2="'",
+        end_terminal_symbol2="'",
+    )
     shared.check_grammar(
         grammar,
-        ['\n', r'''
-'''],
-        [r'\n'],
+        [
+            "\n",
+            r"""
+""",
+        ],
+        [r"\n"],
     )
 
 
@@ -137,12 +149,15 @@ def test_bnf_single_special_symbol_2():
     """
     grammar = al.Grammar(
         bnf_text=bnf_text,
-        start_terminal_symbol='"', end_terminal_symbol='"',
-        start_terminal_symbol2="'", end_terminal_symbol2="'")
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+        start_terminal_symbol2="'",
+        end_terminal_symbol2="'",
+    )
     shared.check_grammar(
         grammar,
-        ['\t', r'	'],
-        [r'\t'],
+        ["\t", r"	"],
+        [r"\t"],
     )
 
 
@@ -152,28 +167,34 @@ def test_bnf_single_special_symbol_3():
     """
     grammar = al.Grammar(
         bnf_text=bnf_text,
-        start_terminal_symbol='"', end_terminal_symbol='"',
-        start_terminal_symbol2="'", end_terminal_symbol2="'")
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+        start_terminal_symbol2="'",
+        end_terminal_symbol2="'",
+    )
     shared.check_grammar(
         grammar,
-        ['\\'],   # single backslash is recognized
-        [r'\\'],  # double backslash is not
+        ["\\"],  # single backslash is recognized
+        [r"\\"],  # double backslash is not
     )
 
 
-@pytest.mark.xfail(strict=True, reason='Probably an error in Earley parser of Lark.')
+@pytest.mark.xfail(strict=True, reason="Probably an error in Earley parser of Lark.")
 def test_bnf_single_special_symbol_4():
     bnf_text = r"""
     <S> ::= "\\"
     """
     grammar = al.Grammar(
         bnf_text=bnf_text,
-        start_terminal_symbol='"', end_terminal_symbol='"',
-        start_terminal_symbol2="'", end_terminal_symbol2="'")
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+        start_terminal_symbol2="'",
+        end_terminal_symbol2="'",
+    )
     shared.check_grammar(
         grammar,
-        [r'\\'],  # double backslash should be recognized
-        ['\\'],   # single backslash should not
+        [r"\\"],  # double backslash should be recognized
+        ["\\"],  # single backslash should not
     )
 
 
@@ -183,28 +204,34 @@ def test_bnf_single_special_symbol_5():
     """
     grammar = al.Grammar(
         bnf_text=bnf_text,
-        start_terminal_symbol='"', end_terminal_symbol='"',
-        start_terminal_symbol2="'", end_terminal_symbol2="'")
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+        start_terminal_symbol2="'",
+        end_terminal_symbol2="'",
+    )
     shared.check_grammar(
         grammar,
-        [r'\\'],
-        [r'\\\\'],
+        [r"\\"],
+        [r"\\\\"],
     )
 
 
-@pytest.mark.xfail(strict=True, reason='Probably an error in Earley parser of Lark.')
+@pytest.mark.xfail(strict=True, reason="Probably an error in Earley parser of Lark.")
 def test_bnf_special_sequence_1():
     bnf_text = r"""
     <S> ::= "a\\b"
     """
     grammar = al.Grammar(
         bnf_text=bnf_text,
-        start_terminal_symbol='"', end_terminal_symbol='"',
-        start_terminal_symbol2="'", end_terminal_symbol2="'")
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+        start_terminal_symbol2="'",
+        end_terminal_symbol2="'",
+    )
     shared.check_grammar(
         grammar,
-        [r'a\\b'],
-        [r'a\b'],
+        [r"a\\b"],
+        [r"a\b"],
     )
 
 
@@ -214,12 +241,15 @@ def test_bnf_special_sequence_2():
     """
     grammar = al.Grammar(
         bnf_text=bnf_text,
-        start_terminal_symbol='"', end_terminal_symbol='"',
-        start_terminal_symbol2="'", end_terminal_symbol2="'")
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+        start_terminal_symbol2="'",
+        end_terminal_symbol2="'",
+    )
     shared.check_grammar(
         grammar,
-        [r'a\b'],
-        [r'a\\b'],
+        [r"a\b"],
+        [r"a\\b"],
     )
 
 
@@ -300,9 +330,9 @@ Right-hand sides:
 
     shared.check_grammar(
         grammar,
-        ['1', '2', '4378', '56378'],
-        ['', '13'],
-        language=['1', '2', '4378', '56378'],
+        ["1", "2", "4378", "56378"],
+        ["", "13"],
+        language=["1", "2", "4378", "56378"],
     )
 
 
@@ -317,8 +347,8 @@ def test_bnf_problematic():
     grammar = al.Grammar(bnf_text=bnf_text, verbose=True)
     shared.check_grammar(
         grammar,
-        ['5', '12', '673', '674', '5674', '555673'],
-        ['', 'X', '21'],
+        ["5", "12", "673", "674", "5674", "555673"],
+        ["", "X", "21"],
     )
 
 
@@ -335,15 +365,19 @@ def test_bnf_unusual_symbols_1():
     """
     grammar = al.Grammar(
         bnf_text=bnf_text,
-        defining_symbol='1314', rule_separator_symbol='`~',
-        start_nonterminal_symbol='ZZ', end_nonterminal_symbol='%',
-        start_terminal_symbol='""', end_terminal_symbol='/',
-        start_terminal_symbol2='/', end_terminal_symbol2='$$',
+        defining_symbol="1314",
+        rule_separator_symbol="`~",
+        start_nonterminal_symbol="ZZ",
+        end_nonterminal_symbol="%",
+        start_terminal_symbol='""',
+        end_terminal_symbol="/",
+        start_terminal_symbol2="/",
+        end_terminal_symbol2="$$",
     )
     shared.check_grammar(
         grammar,
-        ['1221112222', '1111111111', '2112221111'],
-        ['1', '111111111'],
+        ["1221112222", "1111111111", "2112221111"],
+        ["1", "111111111"],
     )
 
 
@@ -356,16 +390,18 @@ def test_bnf_unusual_symbols_2():
 """
     # Grammar creation
     grammar = al.Grammar(
-        bnf_text=bnf_text, defining_symbol='/', rule_separator_symbol='+',
-        start_nonterminal_symbol='(', end_nonterminal_symbol=']',
-        start_terminal_symbol='"', end_terminal_symbol='"',
-        start_terminal_symbol2='{', end_terminal_symbol2='}')
-
-    shared.check_grammar(
-        grammar,
-        ['1', '2', 'ab', '3'],
-        ['', '12', '12', '2a', '2a']
+        bnf_text=bnf_text,
+        defining_symbol="/",
+        rule_separator_symbol="+",
+        start_nonterminal_symbol="(",
+        end_nonterminal_symbol="]",
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+        start_terminal_symbol2="{",
+        end_terminal_symbol2="}",
     )
+
+    shared.check_grammar(grammar, ["1", "2", "ab", "3"], ["", "12", "12", "2a", "2a"])
 
 
 def test_bnf_unusual_symbols_3():
@@ -378,32 +414,35 @@ def test_bnf_unusual_symbols_3():
     # Grammar creation
     grammar = al.Grammar(
         bnf_text=bnf_text,
-        start_terminal_symbol='"', end_terminal_symbol='"',
-        start_terminal_symbol2="'", end_terminal_symbol2="'")
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+        start_terminal_symbol2="'",
+        end_terminal_symbol2="'",
+    )
     shared.check_grammar(
         grammar,
-        ['7xR', '7yS', '8yS', '9xS'],
-        ['', '12', '12', '2a', '2a'],
+        ["7xR", "7yS", "8yS", "9xS"],
+        ["", "12", "12", "2a", "2a"],
         language=[
-            '7xR',
-            '7xS',
-            '7yR',
-            '7yS',
-            '8xR',
-            '8xS',
-            '8yR',
-            '8yS',
-            '9xR',
-            '9xS',
-            '9yR',
-            '9yS',
-        ]
+            "7xR",
+            "7xS",
+            "7yR",
+            "7yS",
+            "8xR",
+            "8xS",
+            "8yR",
+            "8yS",
+            "9xR",
+            "9xS",
+            "9yR",
+            "9yS",
+        ],
     )
 
 
 def test_bnf_unusual_symbols_4():
     # http://blog.hvidtfeldts.net/index.php/2008/12/grammars-for-generative-art-part-i/
-    bnf_text ="""
+    bnf_text = """
 [English Sentence] = [Simple Sentence]
 [Simple Sentence] = [Declarative Sentence]
 [Declarative Sentence] = [subject] [predicate]
@@ -417,13 +456,16 @@ def test_bnf_unusual_symbols_4():
     # Grammar creation
     grammar = al.Grammar(
         bnf_text=bnf_text,
-        defining_symbol='=',
-        start_nonterminal_symbol='[', end_nonterminal_symbol=']',
-        start_terminal_symbol='"', end_terminal_symbol='"')
+        defining_symbol="=",
+        start_nonterminal_symbol="[",
+        end_nonterminal_symbol="]",
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+    )
     shared.check_grammar(
         grammar,
-        ['theyare', 'wewere', 'sheis'],
-        ['', 'CSCI3125', 'MA2743', 'PHY120', 'EPI65811']
+        ["theyare", "wewere", "sheis"],
+        ["", "CSCI3125", "MA2743", "PHY120", "EPI65811"],
     )
 
 
@@ -441,10 +483,20 @@ def test_bnf_palindromes_even_with_interspersed_whitespaces():
     grammar = al.Grammar(bnf_text=bnf_text)
     shared.check_grammar(
         grammar,
-        ['', 'aa', 'bb', 'aaaa', 'abba', 'baab', 'bbbb', 'aabbaa', 'aaabababbabaababbababaaa'],
-        ['aaba', 'aabbaab'],
-        language=['', 'aa', 'bb', 'aaaa', 'abba', 'baab', 'bbbb'],
-        max_steps=3
+        [
+            "",
+            "aa",
+            "bb",
+            "aaaa",
+            "abba",
+            "baab",
+            "bbbb",
+            "aabbaa",
+            "aaabababbabaababbababaaa",
+        ],
+        ["aaba", "aabbaab"],
+        language=["", "aa", "bb", "aaaa", "abba", "baab", "bbbb"],
+        max_steps=3,
     )
 
 
@@ -456,10 +508,10 @@ def test_bnf_parentheses_with_interspersed_whitespaces():
     grammar = al.Grammar(bnf_text=bnf_text)
     shared.check_grammar(
         grammar,
-        ['()', '((()))()(())(((())))'],
-        ['', '(', ')', '(((()))()(())(((())))'],
-        language=['()', '(())', '()()'],
-        max_steps=2
+        ["()", "((()))()(())(((())))"],
+        ["", "(", ")", "(((()))()(())(((())))"],
+        language=["()", "(())", "()()"],
+        max_steps=2,
     )
 
 
@@ -468,33 +520,30 @@ def test_bnf_isomorphisms():
         (
             """
             <a> ::= | x
-            """
-            ,
+            """,
             """
             <a> ::= '' | 'x'
-            """
+            """,
         ),
         (
             """
             <a> ::= x | | y
-            """
-            ,
+            """,
             """
             <a> ::= 'x' | '' | 'y'
-            """
+            """,
         ),
         (
             """
             <a> ::= <b> |
             <b> ::= c | d | <x>
             <x> ::= 1 <a> 2 | 1 4 <b>
-            """
-            ,
+            """,
             """
             <a> ::= <b> | ''
             <b> ::= 'c' | "d" | <x>
             <x> ::= '1' <a> "2" | '1' "4" <b>
-            """
+            """,
         ),
         (
             """
@@ -505,8 +554,7 @@ def test_bnf_isomorphisms():
                   | <x>
             <x> ::= 1 <a> 2
                   | 1 4 <b>
-            """
-            ,
+            """,
             """
             <a> ::= <b>
                   | ''
@@ -515,17 +563,19 @@ def test_bnf_isomorphisms():
                   | <x>
             <x> ::= '1' <a> "2"
                   | '1' "4" <b>
-            """
+            """,
         ),
     ]
 
     for bnf_nonquoted, bnf_quoted in equivalent_formulations:
-        grammar1 = grammar = al.Grammar(
-            bnf_text=bnf_nonquoted)
-        grammar2 = grammar = al.Grammar(
+        grammar1 = al.Grammar(bnf_text=bnf_nonquoted)
+        grammar2 = al.Grammar(
             bnf_text=bnf_quoted,
-            start_terminal_symbol='"', end_terminal_symbol='"',
-            start_terminal_symbol2="'", end_terminal_symbol2="'")
+            start_terminal_symbol='"',
+            end_terminal_symbol='"',
+            start_terminal_symbol2="'",
+            end_terminal_symbol2="'",
+        )
         assert grammar1.production_rules == grammar2.production_rules
 
 
@@ -535,35 +585,33 @@ def test_bnf_fail_due_to_invalid_arguments():
     with pytest.raises(TypeError):
         al.Grammar(bnf_file=3)
     with pytest.raises(FileNotFoundError):
-        al.Grammar(bnf_file='this is a nonexisting file')
+        al.Grammar(bnf_file="this is a nonexisting file")
 
 
 def test_bnf_fail_due_to_invalid_bnf():
     with pytest.raises(Exception):
-        al.Grammar(bnf_text='')
+        al.Grammar(bnf_text="")
     with pytest.raises(Exception):
-        al.Grammar(bnf_text='A := x | y')
+        al.Grammar(bnf_text="A := x | y")
 
 
 def test_bnf_fail_due_to_missing_lhs():
     bnf_texts = [
         """
         <a> ::= <b>
-        """
-        ,
+        """,
         """
         <a> ::= x | y | <b>
         <b> ::= <c> | <d>
         <d> ::=
-        """
-        ,
+        """,
         """
         <a> ::= x | y | <b>
         <b> ::= <c> | <d>
         <c> ::= <b>
         <d> ::= <a>
         <e> ::= <f> | x
-        """
+        """,
     ]
     for text in bnf_texts:
         with pytest.raises(Exception):
@@ -576,11 +624,14 @@ def test_bnf_and_ebnf_with_multiple_delimiters():
     """
     grammar = al.Grammar(
         ebnf_text=ebnf_text,
-        start_nonterminal_symbol='<', end_nonterminal_symbol='>',
-        start_terminal_symbol='', end_terminal_symbol='',
-        start_terminal_symbol2='X', end_terminal_symbol2='Y',
+        start_nonterminal_symbol="<",
+        end_nonterminal_symbol=">",
+        start_terminal_symbol="",
+        end_terminal_symbol="",
+        start_terminal_symbol2="X",
+        end_terminal_symbol2="Y",
     )
-    assert grammar.recognize_string('a')
+    assert grammar.recognize_string("a")
     # TODO assert grammar.recognize_string('b')
 
 
@@ -592,9 +643,12 @@ def test_bnf_and_ebnf_fail_due_to_delimiters():
     with pytest.raises(al.exceptions.GrammarError):
         al.Grammar(
             bnf_text=bnf_text,
-            start_nonterminal_symbol='', end_nonterminal_symbol='',
-            start_terminal_symbol='', end_terminal_symbol='',
-            start_terminal_symbol2='', end_terminal_symbol2='',
+            start_nonterminal_symbol="",
+            end_nonterminal_symbol="",
+            start_terminal_symbol="",
+            end_terminal_symbol="",
+            start_terminal_symbol2="",
+            end_terminal_symbol2="",
         )
 
     bnf_text = """
@@ -603,9 +657,12 @@ def test_bnf_and_ebnf_fail_due_to_delimiters():
     with pytest.raises(al.exceptions.GrammarError):
         al.Grammar(
             bnf_text=bnf_text,
-            start_nonterminal_symbol='1', end_nonterminal_symbol='',
-            start_terminal_symbol='', end_terminal_symbol='',
-            start_terminal_symbol2='', end_terminal_symbol2='',
+            start_nonterminal_symbol="1",
+            end_nonterminal_symbol="",
+            start_terminal_symbol="",
+            end_terminal_symbol="",
+            start_terminal_symbol2="",
+            end_terminal_symbol2="",
         )
 
     bnf_text = """
@@ -614,9 +671,12 @@ def test_bnf_and_ebnf_fail_due_to_delimiters():
     with pytest.raises(al.exceptions.GrammarError):
         al.Grammar(
             bnf_text=bnf_text,
-            start_nonterminal_symbol='', end_nonterminal_symbol='',
-            start_terminal_symbol='1', end_terminal_symbol='',
-            start_terminal_symbol2='', end_terminal_symbol2='',
+            start_nonterminal_symbol="",
+            end_nonterminal_symbol="",
+            start_terminal_symbol="1",
+            end_terminal_symbol="",
+            start_terminal_symbol2="",
+            end_terminal_symbol2="",
         )
 
     bnf_text = """
@@ -625,9 +685,12 @@ def test_bnf_and_ebnf_fail_due_to_delimiters():
     with pytest.raises(al.exceptions.GrammarError):
         al.Grammar(
             bnf_text=bnf_text,
-            start_nonterminal_symbol='', end_nonterminal_symbol='',
-            start_terminal_symbol='', end_terminal_symbol='',
-            start_terminal_symbol2='', end_terminal_symbol2='1',
+            start_nonterminal_symbol="",
+            end_nonterminal_symbol="",
+            start_terminal_symbol="",
+            end_terminal_symbol="",
+            start_terminal_symbol2="",
+            end_terminal_symbol2="1",
         )
 
     # EBNF
@@ -637,9 +700,12 @@ def test_bnf_and_ebnf_fail_due_to_delimiters():
     with pytest.raises(al.exceptions.GrammarError):
         al.Grammar(
             ebnf_text=ebnf_text,
-            start_nonterminal_symbol='', end_nonterminal_symbol='',
-            start_terminal_symbol='', end_terminal_symbol='',
-            start_terminal_symbol2='', end_terminal_symbol2='',
+            start_nonterminal_symbol="",
+            end_nonterminal_symbol="",
+            start_terminal_symbol="",
+            end_terminal_symbol="",
+            start_terminal_symbol2="",
+            end_terminal_symbol2="",
         )
 
     ebnf_text = """
@@ -648,9 +714,12 @@ def test_bnf_and_ebnf_fail_due_to_delimiters():
     with pytest.raises(al.exceptions.GrammarError):
         al.Grammar(
             ebnf_text=ebnf_text,
-            start_nonterminal_symbol='<', end_nonterminal_symbol='>',
-            start_terminal_symbol='', end_terminal_symbol='',
-            start_terminal_symbol2='', end_terminal_symbol2='',
+            start_nonterminal_symbol="<",
+            end_nonterminal_symbol=">",
+            start_terminal_symbol="",
+            end_terminal_symbol="",
+            start_terminal_symbol2="",
+            end_terminal_symbol2="",
         )
 
 
@@ -662,23 +731,32 @@ def test_bnf_fails_during_writing():
     grammar = al.Grammar(bnf_text=bnf_text)
 
     # Working
-    grammar.to_bnf_text(start_nonterminal_symbol='X', end_nonterminal_symbol='Y')
+    grammar.to_bnf_text(start_nonterminal_symbol="X", end_nonterminal_symbol="Y")
     grammar.to_bnf_text(
-        start_nonterminal_symbol='', end_nonterminal_symbol='',
-        start_terminal_symbol='"', end_terminal_symbol='"')
+        start_nonterminal_symbol="",
+        end_nonterminal_symbol="",
+        start_terminal_symbol='"',
+        end_terminal_symbol='"',
+    )
 
     # Failing
     with pytest.raises(al.exceptions.GrammarError):
-        grammar.to_bnf_text(start_nonterminal_symbol='X', end_nonterminal_symbol='A')
+        grammar.to_bnf_text(start_nonterminal_symbol="X", end_nonterminal_symbol="A")
     with pytest.raises(al.exceptions.GrammarError):
-        grammar.to_bnf_text(start_terminal_symbol='X', end_terminal_symbol='0')
+        grammar.to_bnf_text(start_terminal_symbol="X", end_terminal_symbol="0")
     with pytest.raises(al.exceptions.GrammarError):
-        grammar.to_bnf_text(start_terminal_symbol2='X', end_terminal_symbol2='0')
-    with pytest.raises(al.exceptions.GrammarError):
-        grammar.to_bnf_text(
-            start_terminal_symbol='X', end_terminal_symbol='0',
-            start_terminal_symbol2='', end_terminal_symbol2='')
+        grammar.to_bnf_text(start_terminal_symbol2="X", end_terminal_symbol2="0")
     with pytest.raises(al.exceptions.GrammarError):
         grammar.to_bnf_text(
-            start_terminal_symbol='<', end_terminal_symbol='0',
-            start_terminal_symbol2='', end_terminal_symbol2='')
+            start_terminal_symbol="X",
+            end_terminal_symbol="0",
+            start_terminal_symbol2="",
+            end_terminal_symbol2="",
+        )
+    with pytest.raises(al.exceptions.GrammarError):
+        grammar.to_bnf_text(
+            start_terminal_symbol="<",
+            end_terminal_symbol="0",
+            start_terminal_symbol2="",
+            end_terminal_symbol2="",
+        )

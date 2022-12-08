@@ -1,11 +1,42 @@
+"""Shared crossover functions for several systems."""
+
 from random import randint as _ri
 
 from ... import exceptions as _exceptions
 
 
-def two_point_length_preserving(grammar, gt1, gt2, parameters, _representation):
+def two_point_length_preserving(grammar, gt1, gt2, parameters, representation):
+    """Generate new genotypes by exchanging sequence parts.
+
+    Select two random, but equally long subsequences in the two
+    genotypes and exchange them.
+
+    Parameters
+    ----------
+    grammar : `~alogos.Grammar`
+    genotype1 : Genotype
+        Genotype of the first parent.
+    genotype2 : Genotype
+        Genotype of the second parent.
+    parameters : `dict` or `~alogos._utilities.parametrization.ParameterCollection`
+        No keyword-value pairs are considered by this function.
+        This argument is only available to have a consistent interface.
+    representation : module
+        Representation module of the system that calls this generic
+        function. This module contains the specific
+        `~.representation.Genotype` subclass of the system, which is
+        used here to create the child genotypes.
+
+    Returns
+    -------
+    genotype1 : Genotype
+        Genotype of the first child.
+    genotype2 : Genotype
+        Genotype of the second child.
+
+    """
     # Argument processing
-    _GT = _representation.Genotype
+    _GT = representation.Genotype
     if not isinstance(gt1, _GT):
         gt1 = _GT(gt1)
     if not isinstance(gt2, _GT):
@@ -33,13 +64,14 @@ def two_point_length_preserving(grammar, gt1, gt2, parameters, _representation):
     return _GT(n1), _GT(n2)
 
 
-def _get_two_different_points(l):
+def _get_two_different_points(n):
+    """Get two different numbers between 0 and n-1 to use as indices."""
     while True:
-        p1 = _ri(0, l)
-        p2 = _ri(0, l)
+        p1 = _ri(0, n)
+        p2 = _ri(0, n)
         if p1 == p2:
             continue
-        if (p1 == 0 and p2 == l) or (p1 == l and p2 == 0):
+        if (p1 == 0 and p2 == n) or (p1 == n and p2 == 0):
             continue
         break
     if p1 > p2:

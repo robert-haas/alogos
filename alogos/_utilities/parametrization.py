@@ -6,22 +6,24 @@ class ParameterCollection:
 
     Provided features:
 
-    - The set of available parameter names is defined once and for all by a
-      dict passed to ``__init__``.
+    - The set of available parameter names is defined once and for all
+      by a dict passed to ``__init__``.
 
     - The user can get and set parameter values
       by dot notation (via ``__setattr__``, e.g. ``param.a = 4``) and
-      bracket notation (via ``__getitem__`` and ``__setitem__``, e.g. ``param['a'] = 4``).
+      bracket notation (via ``__getitem__`` and ``__setitem__``,
+      e.g. ``param['a'] = 4``).
 
-    - The user can check if a parameter name is included in the collection
-      (via __contains__, e.g. 'a' in param).
+    - The user can check if a parameter name is included in the
+      collection (via __contains__, e.g. 'a' in param).
 
-    - If a user tries to get or set an unknown parameter (detected via ``__getattr__``),
-      an error is raised, which lists all available parameters and their current
-      and initial values.
-      Note that there is a deliberate asymmetry between ``__setattr__`` and
-      ``__getattr__`` in Python 3. The former is called on any attribute assignment,
-      but the latter is only called when attribute lookup fails by all other methods.
+    - If a user tries to get or set an unknown parameter (detected via
+      ``__getattr__``), an error is raised, which lists all available
+      parameters and their current and initial values.
+      Note that there is a deliberate asymmetry between ``__setattr__``
+      and ``__getattr__`` in Python 3. The former is called on any
+      attribute assignment, but the latter is only called when
+      attribute lookup fails by all other methods.
 
     References
     ----------
@@ -30,8 +32,10 @@ class ParameterCollection:
     - https://ipython.readthedocs.io/en/stable/config/integrating.html
 
     """
+
     def __init__(self, parameter_dict):
-        for name in ['keys', 'values', 'items']:
+        """Create a parameter collection from a dictionary."""
+        for name in ["keys", "values", "items"]:
             if name in parameter_dict:
                 _exceptions.raise_initial_parameter_error(name)
 
@@ -39,91 +43,98 @@ class ParameterCollection:
         self.__dict__.update(parameter_dict)
 
     def __str__(self):
+        """Compute the "informal" string representation of the parameter collection."""
+
         def append_parameters_to_output(lines, pc, indent=0):
             for key in pc:
                 original_value = pc._initial_parameters[key]
                 current_value = pc[key]
                 if isinstance(current_value, ParameterCollection):
-                    line = '{}- {}:'.format(' ' * indent, key)
+                    line = "{}- {}:".format(" " * indent, key)
                     lines.append(line)
-                    add_parameters_to_output(lines, current_value, indent+2)
+                    append_parameters_to_output(lines, current_value, indent + 2)
                 elif current_value == original_value:
-                    line = '{}- {}: {}'.format(' ' * indent, key, repr(original_value))
+                    line = "{}- {}: {}".format(" " * indent, key, repr(original_value))
                     lines.append(line)
                 else:
-                    line = '{}- {}: {} currently, {} originally'.format(
-                        ' ' * indent, key, repr(current_value), repr(original_value))
+                    line = "{}- {}: {} currently, {} originally".format(
+                        " " * indent, key, repr(current_value), repr(original_value)
+                    )
                     lines.append(line)
             return lines
 
         lines = []
-        lines.append('Parameters:')
+        lines.append("Parameters:")
         lines = append_parameters_to_output(lines, self)
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def __repr__(self):
-        return '<ParameterCollection object at {}>'.format(hex(id(self)))
-    
+        """Compute the "official" string representation of the parameter collection."""
+        return "<ParameterCollection object at {}>".format(hex(id(self)))
+
     def _repr_pretty_(self, p, cycle):
-        """Provide a rich display representation for IPython interpreters."""
+        """Provide rich display representation for IPython and Jupyter."""
         if cycle:
             p.text(repr(self))
         else:
             p.text(str(self))
 
     def __contains__(self, item):
-        """Called to implement membership test operators, according to docs."""
+        """Check if a given string is a known parameter name."""
         return item in self._initial_parameters.keys()
 
     def __getattr__(self, key):
-        """Called when the default attribute access fails, according to docs.
+        """Provide a fallback when default attribute access fails.
 
         Notes
         -----
-        Properties starting with '__' are silently ignored, so that inspection
-        methods do not raise unnecessary errors, such as those used by Python's
-        builtin help system.
+        Properties starting with '__' are silently ignored, so that
+        inspection methods do not raise unnecessary errors, such as
+        those used by Python's built-in help system.
 
         """
-        if not key.startswith('__'):
+        if not key.startswith("__"):
             _exceptions.raise_unknown_parameter_error(key, self)
 
     def __setattr__(self, key, value):
-        """Called when an attribute assignment is attempted, according to docs."""
-        if key != '_initial_parameters' and key not in self._initial_parameters:
+        """Enable attribute assignment."""
+        if key != "_initial_parameters" and key not in self._initial_parameters:
             _exceptions.raise_unknown_parameter_error(key, self)
         self.__dict__[key] = value
 
     def __getitem__(self, key):
-        """Called to implement membership test operators, according to docs."""
+        """Enable item retrieval."""
         if key not in self:
             _exceptions.raise_unknown_parameter_error(key, self)
         return self.__dict__[key]
 
     def __setitem__(self, key, value):
-        """Called to implement assignment to self[key], according to docs."""
+        """Enable item assignment via object[key]."""
         self.__setattr__(key, value)
 
     def __iter__(self):
-        """Called when an iterator is required for a container, according to docs."""
+        """Return an iterator that goes over all parameter names."""
         return iter(name for name in self._initial_parameters)
-    
+
     def __len__(self):
-        """Called to implement the built-in function len(), according to docs."""
+        """Compute the number of parameters."""
         return len(self._initial_parameters)
 
     def __copy__(self):
-        """Create a shallow copy this object, which can be called with copy()."""
+        """Create a shallow copy this object."""
         current_dict = {key: val for key, val in self.items()}
         return current_dict
 
     def keys(self):
+        """Get parameter names."""
         return self._initial_parameters.keys()
-    
+
     def values(self):
+        """Get parameter values."""
         return (self.__dict__[key] for key in self._initial_parameters)
-    
+
     def items(self):
+        """Get parameter names and values."""
         return ((key, self.__dict__[key]) for key in self._initial_parameters)
 
 

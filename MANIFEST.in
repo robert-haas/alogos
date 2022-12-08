@@ -1,5 +1,6 @@
 # Inclusion of specific files
 include LICENSE
+include NOTICE
 include README.rst
 
 # Exclusion of file patterns
