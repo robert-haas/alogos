@@ -298,7 +298,7 @@ def test_warning_for_more_than_one_grammar_specification():
 def test_grammar_file_reading_errors():
     gr = al.Grammar()
     gr._read_file(os.path.join(IN_DIR, "fileformats", "simple.txt"))
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         gr._read_file(os.path.join(IN_DIR, "fileformats", "simple.bin"))
     with pytest.raises(FileNotFoundError):
         gr._read_file("hopefully_non-existing_filepath")

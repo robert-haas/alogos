@@ -86,7 +86,7 @@ class EvolutionaryAlgorithm:
     Evolution (GE) and Context-Free Grammar Genetic
     Programming (CFG-GP). It uses following concepts that are directly
     relevant for the usage of this class:
-    
+
     - Individual: An individual represents a single candidate solution
       and comes with a genotype, phenotype and fitness.
       The genotype can be modified with variation operators to give

@@ -146,6 +146,7 @@ def _extra_preprocessing(grammar):
       removed from the grammar before CNF transformation
 
     """
+
     # 1) Remove nonterminals that can only be derived to an empty string
     # or list of empty strings and replace their appearances on rhs
     # with a ε terminal.
@@ -307,6 +308,7 @@ def _process_nullable_nonterminals(grammar, nullable_nonterminals):
       computation (2004): p. 266
 
     """
+
     # For each nullable nonterminal, let it be present or absent
     # wherever it appears on a rhs by adding new rules (all
     # combinatorial possibilities that arise from multiple nullable nt)
@@ -379,6 +381,7 @@ def _remove_remaining_eps(grammar):
       p. 162, step 4 of removeEps
 
     """
+
     # Remove A -> ε
     def is_eps(rhs):
         return len(rhs) == 1 and _shared.is_empty_terminal(rhs[0])
@@ -464,6 +467,7 @@ def _remove_mixed_productions(grammar):
     - Rich - Automata, Computability and Complexity (2007): p. 172
 
     """
+
     # 2. Create a new nonterminal T_a for each terminal a in Σ
     def create_new_nonterminal(grammar, terminal):
         i = 0
@@ -521,6 +525,7 @@ def _remove_rules_longer_than_2(grammar):
       computation (2004): p. 273
 
     """
+
     # 2. For each rule [...] n > 2, create new nonterminals
     def create_and_add_new_rules(new_rules, lhs, rhs):
         ns = rhs

@@ -589,9 +589,9 @@ def test_bnf_fail_due_to_invalid_arguments():
 
 
 def test_bnf_fail_due_to_invalid_bnf():
-    with pytest.raises(Exception):
+    with pytest.raises(al.exceptions.GrammarError):
         al.Grammar(bnf_text="")
-    with pytest.raises(Exception):
+    with pytest.raises(al.exceptions.GrammarError):
         al.Grammar(bnf_text="A := x | y")
 
 
@@ -614,7 +614,7 @@ def test_bnf_fail_due_to_missing_lhs():
         """,
     ]
     for text in bnf_texts:
-        with pytest.raises(Exception):
+        with pytest.raises(al.exceptions.GrammarError):
             al.Grammar(bnf_text=text)
 
 

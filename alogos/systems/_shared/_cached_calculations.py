@@ -31,6 +31,7 @@ def is_recursive(grammar):
       contains ``S`` again.
 
     """
+
     # Compute for each nonterminal whether it can produce itself
     def can_nt_produce_itself(nt):
         """Check if a nonterminal can produce itself.

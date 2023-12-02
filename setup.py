@@ -116,11 +116,6 @@ setup(
         "Natural Language :: English",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
         "Topic :: Scientific/Engineering",
         "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
         "Topic :: Software Development",
@@ -146,7 +141,7 @@ setup(
         # Cache results
         "pylru<2,>=1.1",
         # Visualize an evolutionary algorithm run
-        "gravis",
+        "gravis<1,>=0.1",
         # Encode binary genotypes of WHGE
         "bitarray<3,>2",
     ],

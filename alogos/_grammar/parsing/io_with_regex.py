@@ -3,11 +3,14 @@ import re as _re
 from ... import exceptions as _exceptions
 from ... import warnings as _warnings
 from ..._utilities import argument_processing as _ap
-from ..._utilities.operating_system import NEWLINE as _NEWLINE
 from .. import data_structures as _data_structures
 
 
 # Shared regex patterns
+# - Universal newline encoding independent of operating system
+#   see https://docs.python.org/3/glossary.html#term-universal-newlines
+_NEWLINE = "\n"
+
 # - Letter followed by arbitrary sequence of letters, digits, _ and -
 _STANDALONE_NONTERMINAL_PATTERN = r"[a-zA-Z][-_0-9a-zA-Z]*"
 

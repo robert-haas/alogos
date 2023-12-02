@@ -2202,6 +2202,7 @@ class DerivationTree:
             A string in JSON format that represents a tree.
 
         """
+
         # Deserialization: Iterate over sequence, add nodes in DFS order, jump when indicated
         def traverse(par):
             nonlocal i

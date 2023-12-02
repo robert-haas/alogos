@@ -491,7 +491,7 @@ def test_ebnf_fail_due_to_invalid_arguments():
 
 
 def test_ebnf_fail_due_to_invalid_bnf():
-    with pytest.raises(Exception):
+    with pytest.raises(al.exceptions.GrammarError):
         al.Grammar(ebnf_text="")
 
 
@@ -514,5 +514,5 @@ def test_ebnf_fail_due_to_missing_lhs():
         """,
     ]
     for text in ebnf_texts:
-        with pytest.raises(Exception):
+        with pytest.raises(al.exceptions.GrammarError):
             al.Grammar(ebnf_text=text)

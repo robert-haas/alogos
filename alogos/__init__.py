@@ -13,7 +13,7 @@ __all__ = [
     "warnings",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 from . import exceptions, systems, warnings
 from ._grammar import Grammar
