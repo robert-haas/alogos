@@ -541,7 +541,7 @@ class Database:
         filepath_used = _utilities.operating_system.ensure_new_path(filepath_used)
 
         # Export
-        self._dbms.export_csv(filepath, name="full_search")
+        self._dbms.export_csv(filepath_used, name="full_search")
         return filepath_used
 
     def import_sql(self, filepath, generation_range=None):
